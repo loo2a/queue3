@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشة عرض المرضى</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes marquee {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .marquee {
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes pulse-scale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .active-call {
+            animation: pulse-scale 0.5s ease-in-out 3, shake 0.5s ease-in-out 2;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+        }
+        .notification-banner {
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white overflow-hidden">
+    <!-- Header -->
+    <div class="bg-blue-800 px-8 py-4 shadow-lg">
+        <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-bold" id="centerName">مركز الرعاية الطبية</h1>
+            <div class="text-right">
+                <div class="text-2xl font-bold" id="currentTime">00:00:00</div>
+                <div class="text-lg" id="currentDate">الأحد، 1 يناير 2025</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Banner -->
+    <div id="notificationBanner" class="hidden notification-banner bg-yellow-500 text-black px-8 py-6 text-center">
+        <div class="text-3xl font-bold" id="notificationText"></div>
+        <div class="text-xl mt-2" id="notificationTime"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex h-[calc(100vh-180px)]">
+        <!-- Clinics Panel (Right Side) -->
+        <div class="w-1/3 p-6 overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4 text-center bg-blue-700 py-3 rounded-lg">العيادات</h2>
+            <div id="clinicCards" class="space-y-4">
+                <!-- Clinic cards will be inserted here -->
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="mt-6 bg-white text-black rounded-lg p-4 text-center">
+                <h3 class="font-bold mb-2">امسح للتقييم</h3>
+                <div id="qrCode" class="flex justify-center">
+                    <svg width="150" height="150" viewBox="0 0 150 150">
+                        <rect width="150" height="150" fill="white"/>
+                        <rect x="10" y="10" width="30" height="30" fill="black"/>
+                        <rect x="110" y="10" width="30" height="30" fill="black"/>
+                        <rect x="10" y="110" width="30" height="30" fill="black"/>
+                        <rect x="60" y="60" width="30" height="30" fill="black"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Panel (Left Side) -->
+        <div class="w-2/3 p-6">
+            <div class="bg-black rounded-lg overflow-hidden h-full relative">
+                <video id="mediaPlayer" class="w-full h-full object-contain" autoplay muted loop>
+                    <source src="" type="video/mp4">
+                    المتصفح لا يدعم تشغيل الفيديو
+                </video>
+                
+                <!-- Custom Name Display -->
+                <div id="customNameDisplay" class="hidden absolute inset-0 flex items-center justify-center bg-blue-900 bg-opacity-95">
+                    <div class="text-center">
+                        <h2 class="text-6xl font-bold mb-4">مرحباً</h2>
+                        <p class="text-8xl font-bold" id="customNameText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Ticker -->
+    <div class="bg-red-600 py-3 overflow-hidden">
+        <div class="marquee whitespace-nowrap text-2xl font-bold">
+            <span id="newsText">مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل</span>
+        </div>
+    </div>
+
+    <script src="js/audio-handler.js"></script>
+    <script>
+        // Initialize
+        const audioHandler = new AudioHandler();
+        let clinicsData = [];
+        let currentCall = null;
+        let mediaFiles = [];
+        let currentMediaIndex = 0;
+
+        // Update time and date
+        function updateDateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            document.getElementById('currentTime').textContent = timeStr;
+            document.getElementById('currentDate').textContent = dateStr;
+        }
+
+        // Load settings
+        async function loadSettings() {
+            try {
+                const result = await window.storage.get('clinic-settings');
+                if (result) {
+                    const settings = JSON.parse(result.value);
+                    document.getElementById('centerName').textContent = settings.centerName;
+                    document.getElementById('newsText').textContent = settings.newsText;
+                    audioHandler.setSpeechRate(settings.speechRate);
+                    audioHandler.setAudioPath(settings.audioPath);
+                    
+                    // Load media files
+                    if (settings.mediaPath) {
+                        mediaFiles = [
+                            settings.mediaPath + 'health1.mp4',
+                            settings.mediaPath + 'health2.mp4',
+                            settings.mediaPath + 'health3.mp4'
+                        ];
+                        playNextMedia();
+                    }
+                }
+            } catch (error) {
+                console.log('Settings not found, using defaults');
+            }
+        }
+
+        // Load clinics
+        async function loadClinics() {
+            try {
+                const result = await window.storage.get('clinic-list');
+                if (result) {
+                    clinicsData = JSON.parse(result.value);
+                    renderClinics();
+                }
+            } catch (error) {
+                console.log('Clinics not found');
+            }
+        }
+
+        // Render clinic cards
+        function renderClinics() {
+            const container = document.getElementById('clinicCards');
+            container.innerHTML = '';
+            
+            clinicsData.forEach(clinic => {
+                if (!clinic.isActive) return;
+                
+                const card = document.createElement('div');
+                card.id = `clinic-${clinic.id}`;
+                card.className = 'bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 shadow-lg transform transition-all duration-300';
+                card.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-2">${clinic.name}</h3>
+                    <div class="text-6xl font-bold text-center py-4 bg-white text-blue-900 rounded-lg">
+                        ${clinic.currentTicket || '---'}
+                    </div>
+                    <div class="text-sm mt-2 text-center opacity-75" id="clinic-time-${clinic.id}"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Highlight clinic card
+        function highlightClinic(clinicId) {
+            const card = document.getElementById(`clinic-${clinicId}`);
+            if (card) {
+                card.classList.add('active-call', 'bg-yellow-500');
+                
+                setTimeout(() => {
+                    card.classList.remove('active-call', 'bg-yellow-500');
+                }, 5000);
+            }
+        }
+
+        // Show notification banner
+        function showNotification(ticketNumber, clinicName) {
+            const banner = document.getElementById('notificationBanner');
+            const text = document.getElementById('notificationText');
+            const time = document.getElementById('notificationTime');
+            
+            text.textContent = `على العميل رقم ${ticketNumber} - ${clinicName}`;
+            time.textContent = new Date().toLocaleTimeString('ar-EG');
+            
+            banner.classList.remove('hidden');
+            
+            // Auto hide after audio finishes (estimate 10 seconds)
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 10000);
+        }
+
+        // Handle call
+        async function handleCall(callData) {
+            const clinic = clinicsData.find(c => c.id === callData.clinicId);
+            if (!clinic) return;
+            
+            // Update clinic current ticket
+            clinic.currentTicket = callData.ticketNumber;
+            clinic.lastCall = new Date().toISOString();
+            
+            // Update display
+            renderClinics();
+            highlightClinic(clinic.id);
+            showNotification(callData.ticketNumber, clinic.name);
+            
+            // Update time display
+            document.getElementById(`clinic-time-${clinic.id}`).textContent = 
+                new Date().toLocaleTimeString('ar-EG');
+            
+            // Play audio
+            await audioHandler.callTicket(callData.ticketNumber, clinic.number, clinic.name);
+        }
+
+        // Listen for calls
+        async function listenForCalls() {
+            try {
+                const result = await window.storage.get('current-call', true);
+                if (result) {
+                    const callData = JSON.parse(result.value);
+                    
+                    // Check if it's a new call
+                    if (!currentCall || currentCall.timestamp !== callData.timestamp) {
+                        currentCall = callData;
+                        await handleCall(callData);
+                    }
+                }
+            } catch (error) {
+                // No current call
+            }
+            
+            // Check again in 1 second
+            setTimeout(listenForCalls, 1000);
+        }
+
+        // Listen for custom name display
+        async function listenForCustomName() {
+            try {
+                const name = await window.storage.get('display-name', true);
+                if (name && name.value) {
+                    document.getElementById('customNameText').textContent = name.value;
+                    document.getElementById('customNameDisplay').classList.remove('hidden');
+                    
+                    // Clear after 10 seconds
+                    setTimeout(async () => {
+                        document.getElementById('customNameDisplay').classList.add('hidden');
+                        await window.storage.delete('display-name', true);
+                    }, 10000);
+                }
+            } catch (error) {
+                // No name to display
+            }
+            
+            setTimeout(listenForCustomName, 2000);
+        }
+
+        // Play media files
+        function playNextMedia() {
+            const player = document.getElementById('mediaPlayer');
+            if (mediaFiles.length === 0) return;
+            
+            player.src = mediaFiles[currentMediaIndex];
+            player.play();
+            
+            player.onended = () => {
+                currentMediaIndex = (currentMediaIndex + 1) % mediaFiles.length;
+                playNextMedia();
+            };
+        }
+
+        // Initialize everything
+        async function init() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            await loadSettings();
+            await loadClinics();
+            
+            listenForCalls();
+            listenForCustomName();
+            
+            // Reload clinics every 5 seconds
+            setInterval(loadClinics, 5000);
+        }
+
+        // Start when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

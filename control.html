@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - العيادة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 to-blue-100 min-h-screen" dir="rtl">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-96">
+            <h1 class="text-3xl font-bold text-center mb-6 text-blue-800">تسجيل الدخول</h1>
+            
+            <div class="mb-4">
+                <label class="block mb-2 font-semibold text-gray-700">اختر العيادة</label>
+                <select id="clinicSelect" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                    <option value="">-- اختر العيادة --</option>
+                </select>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block mb-2 font-semibold text-gray-700">كلمة المرور</label>
+                <input type="password" id="passwordInput" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none" placeholder="أدخل كلمة المرور">
+            </div>
+            
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                دخول
+            </button>
+            
+            <div id="loginError" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center"></div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="controlPanel" class="hidden p-6">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-blue-800" id="clinicTitle">لوحة التحكم</h1>
+                    <p class="text-gray-600" id="clinicInfo">العيادة: ---</p>
+                </div>
+                <button onclick="logout()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition">
+                    خروج
+                </button>
+            </div>
+        </div>
+
+        <!-- Current Ticket Display -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-xl p-8 mb-6 text-white">
+            <h2 class="text-2xl font-bold mb-4 text-center">الرقم الحالي</h2>
+            <div class="text-9xl font-bold text-center" id="currentTicketDisplay">0</div>
+            <div class="text-center mt-4 text-xl" id="lastCallTime">آخر نداء: ---</div>
+        </div>
+
+        <!-- Control Buttons Grid -->
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+            <!-- Next -->
+            <button onclick="nextTicket()" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
+                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                </svg>
+                <span class="text-2xl font-bold">العميل التالي</span>
+            </button>
+
+            <!-- Previous -->
+            <button onclick="previousTicket()" class="bg-yellow-600 text-white p-6 rounded-lg hover:bg-yellow-700 transition shadow-lg">
+                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+                </svg>
+                <span class="text-2xl font-bold">العميل السابق</span>
+            </button>
+
+            <!-- Repeat -->
+            <button onclick="repeatCall()" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span class="text-2xl font-bold">تكرار النداء</span>
+            </button>
+        </div>
+
+        <!-- Additional Controls -->
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <!-- Reset -->
+            <button onclick="resetClinic()" class="bg-red-600 text-white p-4 rounded-lg hover:bg-red-700 transition shadow-lg">
+                <svg class="w-8 h-8 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span class="text-xl font-bold">تصفير العيادة</span>
+            </button>
+
+            <!-- Emergency -->
+            <button onclick="emergencyCall()" class="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 transition shadow-lg">
+                <svg class="w-8 h-8 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span class="text-xl font-bold">نداء للطوارئ</span>
+            </button>
+        </div>
+
+        <!-- Custom Call -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-xl font-bold mb-4 text-blue-800">نداء عميل معين</h3>
+            <div class="flex gap-4">
+                <input type="number" id="customTicketInput" placeholder="رقم العميل" class="flex-1 p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                <button onclick="callCustomTicket()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-bold">
+                    نداء
+                </button>
+            </div>
+        </div>
+
+        <!-- Display Name -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 class="text-xl font-bold mb-4 text-blue-800">عرض اسم معين</h3>
+            <div class="flex gap-4">
+                <input type="text" id="customNameInput" placeholder="اسم العميل" class="flex-1 p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                <button onclick="displayCustomName()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-bold">
+                    عرض
+                </button>
+            </div>
+        </div>
+
+        <!-- Pause/Resume -->
+        <div class="grid md:grid-cols-2 gap-4">
+            <button onclick="pauseClinic()" id="pauseBtn" class="bg-orange-600 text-white p-4 rounded-lg hover:bg-orange-700 transition shadow-lg">
+                <svg class="w-8 h-8 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xl font-bold">إيقاف العيادة</span>
+            </button>
+
+            <button onclick="resumeClinic()" id="resumeBtn" class="bg-teal-600 text-white p-4 rounded-lg hover:bg-teal-700 transition shadow-lg hidden">
+                <svg class="w-8 h-8 inline ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xl font-bold">استئناف العيادة</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="js/audio-handler.js"></script>
+    <script>
+        let currentClinic = null;
+        let clinics = [];
+
+        // Load clinics for login
+        async function loadClinicsForLogin() {
+            try {
+                const result = await window.storage.get('clinic-list');
+                if (result) {
+                    clinics = JSON.parse(result.value);
+                    const select = document.getElementById('clinicSelect');
+                    
+                    clinics.forEach(clinic => {
+                        const option = document.createElement('option');
+                        option.value = clinic.id;
+                        option.textContent = clinic.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading clinics:', error);
+            }
+        }
+
+        // Login
+        function login() {
+            const clinicId = document.getElementById('clinicSelect').value;
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!clinicId) {
+                errorDiv.textContent = 'يرجى اختيار العيادة';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            const clinic = clinics.find(c => c.id === parseInt(clinicId));
+            
+            if (clinic && clinic.password === password) {
+                currentClinic = clinic;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('controlPanel').classList.remove('hidden');
+                
+                document.getElementById('clinicTitle').textContent = clinic.name;
+                document.getElementById('clinicInfo').textContent = `العيادة: ${clinic.name} | الرقم: ${clinic.number}`;
+                updateDisplay();
+            } else {
+                errorDiv.textContent = 'كلمة المرور غير صحيحة';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                currentClinic = null;
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('controlPanel').classList.add('hidden');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // Update display
+        function updateDisplay() {
+            if (currentClinic) {
+                document.getElementById('currentTicketDisplay').textContent = currentClinic.currentTicket || 0;
+                
+                if (currentClinic.lastCall) {
+                    const time = new Date(currentClinic.lastCall).toLocaleTimeString('ar-EG');
+                    document.getElementById('lastCallTime').textContent = `آخر نداء: ${time}`;
+                }
+            }
+        }
+
+        // Call ticket
+        async function callTicket(ticketNumber) {
+            if (!currentClinic) return;
+            
+            const callData = {
+                clinicId: currentClinic.id,
+                ticketNumber: ticketNumber,
+                clinicName: currentClinic.name,
+                timestamp: Date.now()
+            };
+            
+            await window.storage.set('current-call', JSON.stringify(callData), true);
+            
+            currentClinic.currentTicket = ticketNumber;
+            currentClinic.lastCall = new Date().toISOString();
+            
+            // Update in storage
+            const index = clinics.findIndex(c => c.id === currentClinic.id);
+            if (index !== -1) {
+                clinics[index] = currentClinic;
+                await window.storage.set('clinic-list', JSON.stringify(clinics));
+            }
+            
+            updateDisplay();
+        }
+
+        // Next ticket
+        function nextTicket() {
+            const next = (currentClinic.currentTicket || 0) + 1;
+            callTicket(next);
+        }
+
+        // Previous ticket
+        function previousTicket() {
+            const prev = Math.max(0, (currentClinic.currentTicket || 0) - 1);
+            callTicket(prev);
+        }
+
+        // Repeat call
+        function repeatCall() {
+            if (currentClinic.currentTicket) {
+                callTicket(currentClinic.currentTicket);
+            }
+        }
+
+        // Reset clinic
+        function resetClinic() {
+            if (confirm('هل أنت متأكد من تصفير العيادة؟')) {
+                callTicket(0);
+            }
+        }
+
+        // Call custom ticket
+        function callCustomTicket() {
+            const ticketNumber = parseInt(document.getElementById('customTicketInput').value);
+            if (ticketNumber && ticketNumber > 0) {
+                callTicket(ticketNumber);
+                document.getElementById('customTicketInput').value = '';
+            } else {
+                alert('يرجى إدخال رقم صحيح');
+            }
+        }
+
+        // Display custom name
+        async function displayCustomName() {
+            const name = document.getElementById('customNameInput').value.trim();
+            if (name) {
+                await window.storage.set('display-name', name, true);
+                document.getElementById('customNameInput').value = '';
+                alert('تم عرض الاسم على الشاشة');
+            } else {
+                alert('يرجى إدخال اسم');
+            }
+        }
+
+        // Emergency call
+        async function emergencyCall() {
+            if (confirm('هل تريد إرسال نداء طوارئ؟')) {
+                await window.storage.set('instant-audio', 'emergency.mp3', true);
+                alert('تم إرسال نداء الطوارئ');
+            }
+        }
+
+        // Pause clinic
+        function pauseClinic() {
+            currentClinic.isActive = false;
+            document.getElementById('pauseBtn').classList.add('hidden');
+            document.getElementById('resumeBtn').classList.remove('hidden');
+            
+            const index = clinics.findIndex(c => c.id === currentClinic.id);
+            if (index !== -1) {
+                clinics[index] = currentClinic;
+                window.storage.set('clinic-list', JSON.stringify(clinics));
+            }
+        }
+
+        // Resume clinic
+        function resumeClinic() {
+            currentClinic.isActive = true;
+            document.getElementById('pauseBtn').classList.remove('hidden');
+            document.getElementById('resumeBtn').classList.add('hidden');
+            
+            const index = clinics.findIndex(c => c.id === currentClinic.id);
+            if (index !== -1) {
+                clinics[index] = currentClinic;
+                window.storage.set('clinic-list', JSON.stringify(clinics));
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            loadClinicsForLogin();
+        });
+    </script>
+</body>
+</html>

@@ -152,12 +152,24 @@
             document.getElementById('currentDate').textContent = dateStr;
         }
 
+        // Wait for Firebase to initialize
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        }
+
         // Load settings
         async function loadSettings() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('clinic-settings');
                 if (result && result.value) {
-                    const settings = JSON.parse(result.value);
+                    const settings = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                     document.getElementById('centerName').textContent = settings.centerName;
                     document.getElementById('newsText').textContent = settings.newsText;
                     audioHandler.setSpeechRate(settings.speechRate);
@@ -179,10 +191,11 @@
 
         // Load clinics
         async function loadClinics() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('clinic-list');
                 if (result && result.value) {
-                    clinicsData = JSON.parse(result.value);
+                    clinicsData = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                     renderClinics();
                 }
             } catch (error) {
@@ -298,10 +311,11 @@
 
         // Listen for calls
         async function listenForCalls() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('current-call', true);
                 if (result && result.value) {
-                    const callData = JSON.parse(result.value);
+                    const callData = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                     
                     // Check if it's a new call
                     if (!currentCall || currentCall.timestamp !== callData.timestamp) {
@@ -319,10 +333,12 @@
 
         // Listen for custom name display
         async function listenForCustomName() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('display-name', true);
                 if (result && result.value) {
-                    document.getElementById('customNameText').textContent = result.value;
+                    const nameData = typeof result.value === 'string' ? result.value : result.value.name || result.value;
+                    document.getElementById('customNameText').textContent = nameData;
                     document.getElementById('customNameDisplay').classList.remove('hidden');
                     
                     // Hide media player

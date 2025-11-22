@@ -90,8 +90,16 @@
         </div>
 
         <!-- Additional Tools -->
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
-            <a href="tts-backup.html" target="_blank" class="card-hover bg-gradient-to-br from-pink-600 to-pink-800 rounded-xl shadow-xl p-6 text-center fade-in block" style="animation-delay: 0.5s">
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <a href="test-firebase.html" target="_blank" class="card-hover bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-xl shadow-xl p-6 text-center fade-in block" style="animation-delay: 0.5s">
+                <svg class="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-2xl font-bold mb-2">🔥 اختبار Firebase</h3>
+                <p class="text-yellow-100">تحقق من الاتصال بقاعدة البيانات</p>
+            </a>
+
+            <a href="tts-backup.html" target="_blank" class="card-hover bg-gradient-to-br from-pink-600 to-pink-800 rounded-xl shadow-xl p-6 text-center fade-in block" style="animation-delay: 0.6s">
                 <svg class="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                 </svg>
@@ -213,20 +221,20 @@
                         mediaPath: './media/',
                         newsText: 'مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل ⭐'
                     };
-                    await window.storage.set('clinic-settings', JSON.stringify(defaultSettings));
+                    await window.storage.set('clinic-settings', defaultSettings);
                     console.log('✅ Default settings initialized');
                 }
 
                 // Check if clinics exist
                 const clinicsResult = await window.storage.get('clinic-list');
-                if (!clinicsResult) {
+                if (!clinicsResult || !clinicsResult.value) {
                     // Set default clinics
                     const defaultClinics = [
                         { id: Date.now() + 1, name: 'طب الأسرة', number: 1, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
                         { id: Date.now() + 2, name: 'الأسنان', number: 2, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
                         { id: Date.now() + 3, name: 'الجلدية', number: 3, password: '1234', currentTicket: 0, isActive: true, lastCall: null }
                     ];
-                    await window.storage.set('clinic-list', JSON.stringify(defaultClinics));
+                    await window.storage.set('clinic-list', defaultClinics);
                     console.log('✅ Default clinics initialized');
                 }
 

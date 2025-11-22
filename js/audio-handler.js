@@ -220,7 +220,9 @@ class AudioHandler {
    */
   async playInstant(filename) {
     try {
-      await this.playAudioFile(filename);
+      // Build full path
+      const fullPath = this.audioBasePath.replace('audio/', 'instant/') + filename;
+      await this.playAudioFile(fullPath);
       return true;
     } catch (error) {
       console.error('Error playing instant audio:', error);

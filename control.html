@@ -369,12 +369,32 @@
 
         // Emergency call
         async function emergencyCall() {
-            if (confirm('🚨 هل تريد إرسال نداء طوارئ؟')) {
+            if (confirm('🚨 هل تريد إرسال نداء طوارئ؟\nسيتم تشغيل صوت الطوارئ وإشعار أحمر على جميع الشاشات')) {
                 try {
+                    // Send emergency signal
+                    const emergencyData = {
+                        type: 'emergency',
+                        clinicId: currentClinic.id,
+                        clinicName: currentClinic.name,
+                        timestamp: Date.now()
+                    };
+                    
+                    // Set instant audio to emergency
                     await window.storage.set('instant-audio', 'emergency.mp3', true);
-                    showStatus('🚨 تم إرسال نداء الطوارئ', 'warning');
+                    
+                    // Set emergency display
+                    await window.storage.set('emergency-alert', emergencyData, true);
+                    
+                    showStatus('🚨 تم إرسال نداء الطوارئ', 'error');
+                    
+                    // Clear after 10 seconds
+                    setTimeout(async () => {
+                        await window.storage.delete('emergency-alert', true);
+                    }, 10000);
+                    
                 } catch (error) {
-                    showStatus('❌ حدث خطأ في إرسال النداء', 'error');
+                    showStatus('❌ حدث خطأ في إرسال نداء الطوارئ', 'error');
+                    console.error('Emergency call error:', error);
                 }
             }
         }
@@ -388,7 +408,7 @@
             const index = clinics.findIndex(c => c.id === currentClinic.id);
             if (index !== -1) {
                 clinics[index] = currentClinic;
-                await window.storage.set('clinic-list', JSON.stringify(clinics));
+                await window.storage.set('clinic-list', clinics);
             }
             
             showStatus('⏸️ تم إيقاف العيادة مؤقتاً', 'warning');
@@ -403,7 +423,7 @@
             const index = clinics.findIndex(c => c.id === currentClinic.id);
             if (index !== -1) {
                 clinics[index] = currentClinic;
-                await window.storage.set('clinic-list', JSON.stringify(clinics));
+                await window.storage.set('clinic-list', clinics);
             }
             
             showStatus('▶️ تم استئناف العيادة', 'success');

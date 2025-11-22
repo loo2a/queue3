@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار Firebase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen text-white p-8" dir="rtl">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white text-gray-800 rounded-2xl shadow-2xl p-8 mb-6">
+            <h1 class="text-4xl font-bold mb-6 text-center text-blue-800">🔥 اختبار Firebase</h1>
+            
+            <div id="status" class="mb-6 p-4 rounded-lg text-center font-bold text-lg">
+                جاري التحميل...
+            </div>
+
+            <div class="space-y-4">
+                <!-- Test 1: Write Data -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2 text-lg">1️⃣ اختبار الكتابة</h3>
+                    <button onclick="testWrite()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+                        كتابة بيانات اختبار
+                    </button>
+                    <div id="writeResult" class="mt-2 text-sm"></div>
+                </div>
+
+                <!-- Test 2: Read Data -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2 text-lg">2️⃣ اختبار القراءة</h3>
+                    <button onclick="testRead()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                        قراءة البيانات
+                    </button>
+                    <div id="readResult" class="mt-2 text-sm"></div>
+                </div>
+
+                <!-- Test 3: Test Settings -->
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2 text-lg">3️⃣ اختبار الإعدادات</h3>
+                    <button onclick="testSettings()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 w-full">
+                        حفظ وقراءة الإعدادات
+                    </button>
+                    <div id="settingsResult" class="mt-2 text-sm"></div>
+                </div>
+
+                <!-- Test 4: Test Clinics -->
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2 text-lg">4️⃣ اختبار العيادات</h3>
+                    <button onclick="testClinics()" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 w-full">
+                        حفظ وقراءة العيادات
+                    </button>
+                    <div id="clinicsResult" class="mt-2 text-sm"></div>
+                </div>
+
+                <!-- Test 5: Test Call -->
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2 text-lg">5️⃣ اختبار النداء</h3>
+                    <button onclick="testCall()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full">
+                        إرسال نداء اختبار
+                    </button>
+                    <div id="callResult" class="mt-2 text-sm"></div>
+                </div>
+
+                <!-- Firebase Data Viewer -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2 text-lg">📊 عرض البيانات</h3>
+                    <button onclick="viewAllData()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 w-full mb-2">
+                        عرض جميع البيانات
+                    </button>
+                    <pre id="dataViewer" class="bg-gray-800 text-green-400 p-4 rounded text-xs overflow-auto max-h-96"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="index.html" class="text-blue-200 hover:text-white underline">← العودة للصفحة الرئيسية</a>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script>
+        // Wait for Firebase to load
+        async function waitForFirebase() {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.storage) {
+                        resolve();
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                check();
+            });
+        }
+
+        // Initialize
+        async function init() {
+            await waitForFirebase();
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = '✅ Firebase متصل بنجاح!';
+            statusDiv.className = 'mb-6 p-4 rounded-lg text-center font-bold text-lg bg-green-100 text-green-800';
+            
+            console.log('✅ Firebase Storage Ready');
+            console.log('🔗 Database URL:', window.firebaseConfig.databaseURL);
+        }
+
+        // Test 1: Write
+        async function testWrite() {
+            const resultDiv = document.getElementById('writeResult');
+            try {
+                const testData = {
+                    message: 'مرحباً من اختبار Firebase',
+                    timestamp: Date.now()
+                };
+                
+                await window.storage.set('test', testData);
+                resultDiv.innerHTML = '<span class="text-green-600">✅ تم الحفظ بنجاح</span>';
+                console.log('✅ Write test passed');
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="text-red-600">❌ فشل الحفظ: ' + error.message + '</span>';
+                console.error('❌ Write test failed:', error);
+            }
+        }
+
+        // Test 2: Read
+        async function testRead() {
+            const resultDiv = document.getElementById('readResult');
+            try {
+                const result = await window.storage.get('test');
+                if (result && result.value) {
+                    resultDiv.innerHTML = '<span class="text-green-600">✅ تم القراءة بنجاح: ' + JSON.stringify(result.value) + '</span>';
+                    console.log('✅ Read test passed:', result.value);
+                } else {
+                    resultDiv.innerHTML = '<span class="text-yellow-600">⚠️ لا توجد بيانات. جرب الكتابة أولاً</span>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="text-red-600">❌ فشل القراءة: ' + error.message + '</span>';
+                console.error('❌ Read test failed:', error);
+            }
+        }
+
+        // Test 3: Settings
+        async function testSettings() {
+            const resultDiv = document.getElementById('settingsResult');
+            try {
+                const settings = {
+                    centerName: 'مركز الرعاية الطبية - اختبار',
+                    speechRate: 1.0,
+                    audioPath: './audio/',
+                    newsText: 'نص اختبار للأخبار'
+                };
+                
+                await window.storage.set('clinic-settings', settings);
+                resultDiv.innerHTML = '<span class="text-blue-600">💾 جاري القراءة...</span>';
+                
+                setTimeout(async () => {
+                    const result = await window.storage.get('clinic-settings');
+                    if (result && result.value) {
+                        resultDiv.innerHTML = '<span class="text-green-600">✅ نجح! البيانات: ' + JSON.stringify(result.value).substring(0, 100) + '...</span>';
+                        console.log('✅ Settings test passed:', result.value);
+                    }
+                }, 1000);
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+                console.error('❌ Settings test failed:', error);
+            }
+        }
+
+        // Test 4: Clinics
+        async function testClinics() {
+            const resultDiv = document.getElementById('clinicsResult');
+            try {
+                const clinics = [
+                    { id: 1, name: 'طب الأسرة', number: 1, password: '1234', currentTicket: 0, isActive: true },
+                    { id: 2, name: 'الأسنان', number: 2, password: '1234', currentTicket: 0, isActive: true }
+                ];
+                
+                await window.storage.set('clinic-list', clinics);
+                resultDiv.innerHTML = '<span class="text-blue-600">💾 جاري القراءة...</span>';
+                
+                setTimeout(async () => {
+                    const result = await window.storage.get('clinic-list');
+                    if (result && result.value) {
+                        const data = Array.isArray(result.value) ? result.value : [result.value];
+                        resultDiv.innerHTML = '<span class="text-green-600">✅ نجح! عدد العيادات: ' + data.length + '</span>';
+                        console.log('✅ Clinics test passed:', data);
+                    }
+                }, 1000);
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+                console.error('❌ Clinics test failed:', error);
+            }
+        }
+
+        // Test 5: Call
+        async function testCall() {
+            const resultDiv = document.getElementById('callResult');
+            try {
+                const callData = {
+                    clinicId: 1,
+                    ticketNumber: 123,
+                    clinicName: 'طب الأسرة',
+                    clinicNumber: 1,
+                    timestamp: Date.now()
+                };
+                
+                await window.storage.set('current-call', callData, true);
+                resultDiv.innerHTML = '<span class="text-green-600">✅ تم إرسال النداء بنجاح!</span>';
+                console.log('✅ Call test passed:', callData);
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="text-red-600">❌ خطأ: ' + error.message + '</span>';
+                console.error('❌ Call test failed:', error);
+            }
+        }
+
+        // View all data
+        async function viewAllData() {
+            const viewer = document.getElementById('dataViewer');
+            viewer.textContent = 'جاري التحميل...';
+            
+            try {
+                const paths = ['clinic-settings', 'clinic-list', 'current-call', 'test'];
+                const allData = {};
+                
+                for (const path of paths) {
+                    try {
+                        const result = await window.storage.get(path);
+                        allData[path] = result ? result.value : 'لا توجد بيانات';
+                    } catch (error) {
+                        allData[path] = 'خطأ: ' + error.message;
+                    }
+                }
+                
+                viewer.textContent = JSON.stringify(allData, null, 2);
+                console.log('📊 All data:', allData);
+            } catch (error) {
+                viewer.textContent = 'خطأ في عرض البيانات: ' + error.message;
+                console.error('❌ View data failed:', error);
+            }
+        }
+
+        // Run on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

@@ -23,6 +23,9 @@
             .no-print {
                 display: none !important;
             }
+            .ticket {
+                page-break-inside: avoid;
+            }
         }
         
         .ticket {
@@ -42,8 +45,15 @@
     <div class="no-print">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-3xl font-bold text-blue-800 mb-2">طباعة تذاكر المرضى</h1>
-            <p class="text-gray-600">اختر العيادة ونطاق الأرقام للطباعة</p>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-blue-800 mb-2">طباعة تذاكر المرضى</h1>
+                    <p class="text-gray-600">اختر العيادة ونطاق الأرقام للطباعة</p>
+                </div>
+                <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+                    العودة
+                </a>
+            </div>
         </div>
 
         <!-- Clinic Selection -->
@@ -106,20 +116,35 @@
         </div>
     </div>
 
+    <script src="js/firebase-config.js"></script>
     <script>
         let selectedClinic = null;
         let clinics = [];
 
+        // Wait for Firebase
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        }
+
         // Load clinics
         async function loadClinics() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('clinic-list');
-                if (result) {
-                    clinics = JSON.parse(result.value);
+                if (result && result.value) {
+                    clinics = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                     renderClinicButtons();
+                    console.log('✅ Clinics loaded:', clinics.length);
                 }
             } catch (error) {
                 console.error('Error loading clinics:', error);
+                alert('حدث خطأ في تحميل العيادات');
             }
         }
 
@@ -128,6 +153,11 @@
             const container = document.getElementById('clinicButtons');
             container.innerHTML = '';
             
+            if (clinics.length === 0) {
+                container.innerHTML = '<p class="col-span-3 text-center text-gray-500">لا توجد عيادات متاحة</p>';
+                return;
+            }
+
             clinics.forEach(clinic => {
                 const button = document.createElement('button');
                 button.className = 'bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-lg transform hover:scale-105';
@@ -151,6 +181,8 @@
                 btn.classList.remove('ring-4', 'ring-yellow-400');
             });
             event.target.closest('button').classList.add('ring-4', 'ring-yellow-400');
+            
+            console.log('✅ Selected clinic:', clinic.name);
         }
 
         // Calculate wait time
@@ -179,9 +211,20 @@
             const start = parseInt(document.getElementById('startNumber').value);
             const end = parseInt(document.getElementById('endNumber').value);
             
+            if (isNaN(start) || isNaN(end)) {
+                alert('يرجى إدخال أرقام صحيحة');
+                return;
+            }
+
             if (start > end) {
                 alert('رقم البداية يجب أن يكون أقل من رقم النهاية');
                 return;
+            }
+
+            if (end - start > 100) {
+                if (!confirm('سيتم طباعة أكثر من 100 تذكرة. هل تريد المتابعة؟')) {
+                    return;
+                }
             }
 
             const container = document.getElementById('ticketsContainer');
@@ -219,9 +262,7 @@
                             <div class="font-semibold mb-1">وقت الانتظار المتوقع</div>
                             <div class="text-blue-600 font-bold">${waitTime}</div>
                         </div>
-                        <div class="text-xs text-gray-600 mt-1">
-                            ${waitingBefore > 0 ? `عدد المنتظرين: ${waitingBefore + i}` : ''}
-                        </div>
+                        ${waitingBefore > 0 ? `<div class="text-xs text-gray-600 mt-1">عدد المنتظرين: ${waitingBefore + i}</div>` : ''}
                     </div>
                     
                     <div class="text-center mt-2">
@@ -232,8 +273,11 @@
                 container.appendChild(ticket);
             }
 
-            document.getElementById('ticketCount').textContent = end - start + 1;
+            const count = end - start + 1;
+            document.getElementById('ticketCount').textContent = count;
             document.getElementById('previewSection').classList.remove('hidden');
+            
+            console.log(`✅ Generated ${count} tickets`);
         }
 
         // Print tickets
@@ -244,6 +288,7 @@
                 return;
             }
 
+            console.log('🖨️ Printing tickets...');
             window.print();
         }
 
@@ -252,12 +297,14 @@
             if (confirm('هل تريد مسح جميع التذاكر؟')) {
                 document.getElementById('ticketsContainer').innerHTML = '';
                 document.getElementById('previewSection').classList.add('hidden');
+                console.log('✅ Tickets cleared');
             }
         }
 
         // Initialize
-        window.addEventListener('load', () => {
-            loadClinics();
+        window.addEventListener('load', async () => {
+            console.log('🖨️ Print page loaded');
+            await loadClinics();
         });
     </script>
 </body>

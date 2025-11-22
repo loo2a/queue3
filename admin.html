@@ -201,12 +201,24 @@
             populateClinicSelects();
         });
 
+        // Wait for Firebase to load
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        }
+
         // Load settings from storage
         async function loadSettings() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('clinic-settings');
                 if (result && result.value) {
-                    settings = JSON.parse(result.value);
+                    settings = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                     
                     // Update UI
                     document.getElementById('centerName').value = settings.centerName;
@@ -232,7 +244,7 @@
             };
 
             try {
-                await window.storage.set('clinic-settings', JSON.stringify(settings));
+                await window.storage.set('clinic-settings', settings);
                 
                 // Show success message
                 const btn = event.target;
@@ -257,10 +269,11 @@
 
         // Load clinics from storage
         async function loadClinics() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('clinic-list');
                 if (result && result.value) {
-                    clinics = JSON.parse(result.value);
+                    clinics = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                 } else {
                     // Default clinics if none exist
                     clinics = [

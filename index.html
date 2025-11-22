@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام نداء المرضى - Clinic Queue System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 min-h-screen text-white" dir="rtl">
+    <!-- Header -->
+    <div class="container mx-auto px-6 py-8">
+        <div class="text-center fade-in">
+            <h1 class="text-6xl font-bold mb-4">نظام نداء المرضى</h1>
+            <p class="text-2xl text-blue-200 mb-8">نظام متكامل لإدارة طوابير المرضى في المراكز الطبية</p>
+            <div class="flex justify-center gap-4 mb-12">
+                <span class="bg-green-500 text-white px-4 py-2 rounded-full">مجاني 100%</span>
+                <span class="bg-blue-500 text-white px-4 py-2 rounded-full">سهل الاستخدام</span>
+                <span class="bg-purple-500 text-white px-4 py-2 rounded-full">عربي بالكامل</span>
+            </div>
+        </div>
+
+        <!-- Main Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Admin Card -->
+            <div class="card-hover bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-2xl p-8 text-center fade-in" style="animation-delay: 0.1s">
+                <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <h2 class="text-3xl font-bold mb-4">الإدارة</h2>
+                <p class="text-blue-100 mb-6">إدارة العيادات والإعدادات العامة للنظام</p>
+                <a href="#admin-section" onclick="showSection('admin')" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-blue-50 transition inline-block">
+                    دخول
+                </a>
+            </div>
+
+            <!-- Display Card -->
+            <div class="card-hover bg-gradient-to-br from-green-600 to-green-800 rounded-2xl shadow-2xl p-8 text-center fade-in" style="animation-delay: 0.2s">
+                <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <h2 class="text-3xl font-bold mb-4">شاشة العرض</h2>
+                <p class="text-green-100 mb-6">عرض العيادات والأرقام للمرضى</p>
+                <a href="display.html" target="_blank" class="bg-white text-green-600 px-8 py-3 rounded-lg font-bold hover:bg-green-50 transition inline-block">
+                    فتح الشاشة
+                </a>
+            </div>
+
+            <!-- Control Card -->
+            <div class="card-hover bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl shadow-2xl p-8 text-center fade-in" style="animation-delay: 0.3s">
+                <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <h2 class="text-3xl font-bold mb-4">التحكم</h2>
+                <p class="text-purple-100 mb-6">لوحة تحكم العيادات ونداء المرضى</p>
+                <a href="control.html" target="_blank" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-bold hover:bg-purple-50 transition inline-block">
+                    دخول
+                </a>
+            </div>
+
+            <!-- Print Card -->
+            <div class="card-hover bg-gradient-to-br from-orange-600 to-orange-800 rounded-2xl shadow-2xl p-8 text-center fade-in" style="animation-delay: 0.4s">
+                <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <h2 class="text-3xl font-bold mb-4">الطباعة</h2>
+                <p class="text-orange-100 mb-6">طباعة تذاكر المرضى</p>
+                <a href="print.html" target="_blank" class="bg-white text-orange-600 px-8 py-3 rounded-lg font-bold hover:bg-orange-50 transition inline-block">
+                    طباعة
+                </a>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-12 fade-in" style="animation-delay: 0.5s">
+            <h2 class="text-4xl font-bold text-center mb-8">المميزات</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-5xl mb-4">🎵</div>
+                    <h3 class="text-xl font-bold mb-2">نظام نداء ذكي</h3>
+                    <p class="text-blue-200">تركيب الأرقام تلقائياً من ملفات صوتية</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl mb-4">💾</div>
+                    <h3 class="text-xl font-bold mb-2">تخزين دائم</h3>
+                    <p class="text-blue-200">حفظ البيانات بشكل مستمر</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl mb-4">🌐</div>
+                    <h3 class="text-xl font-bold mb-2">عمل أونلاين</h3>
+                    <p class="text-blue-200">يعمل عبر الإنترنت من أي جهاز</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl mb-4">📱</div>
+                    <h3 class="text-xl font-bold mb-2">متجاوب</h3>
+                    <p class="text-blue-200">يعمل على جميع الأجهزة</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl mb-4">🎨</div>
+                    <h3 class="text-xl font-bold mb-2">تصميم جذاب</h3>
+                    <p class="text-blue-200">واجهة عصرية وسهلة الاستخدام</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl mb-4">🆓</div>
+                    <h3 class="text-xl font-bold mb-2">مجاني تماماً</h3>
+                    <p class="text-blue-200">بدون أي تكاليف خفية</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions Section -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-12 fade-in" style="animation-delay: 0.6s">
+            <h2 class="text-4xl font-bold text-center mb-8">كيفية الاستخدام</h2>
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">إعداد الملفات الصوتية</h3>
+                        <p class="text-blue-200">قم بتشغيل ملف generate_audio.py لإنشاء جميع الملفات الصوتية المطلوبة</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">رفع المشروع على GitHub</h3>
+                        <p class="text-blue-200">ارفع جميع الملفات إلى GitHub وفعّل GitHub Pages</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">إعداد العيادات</h3>
+                        <p class="text-blue-200">استخدم صفحة الإدارة لإضافة وتعديل العيادات</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">ابدأ الاستخدام</h3>
+                        <p class="text-blue-200">افتح شاشة العرض على التلفزيون، واستخدم لوحة التحكم لنداء المرضى</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Section (Hidden by default) -->
+        <div id="admin-section" class="hidden">
+            <div class="bg-white text-gray-900 rounded-2xl p-8 fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-blue-800">لوحة الإدارة</h2>
+                    <button onclick="hideSection()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                        إغلاق
+                    </button>
+                </div>
+                <iframe src="admin.html" class="w-full h-screen border-0 rounded-lg"></iframe>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-blue-200 fade-in" style="animation-delay: 0.7s">
+            <p class="text-lg mb-2">نظام نداء المرضى © 2025</p>
+            <p>تم التطوير بواسطة Claude</p>
+            <div class="mt-4">
+                <a href="https://github.com/YOUR_USERNAME/clinic-queue" target="_blank" class="text-white hover:text-blue-300 underline">
+                    مشاهدة على GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(section) {
+            if (section === 'admin') {
+                document.getElementById('admin-section').classList.remove('hidden');
+                window.scrollTo({ top: document.getElementById('admin-section').offsetTop - 100, behavior: 'smooth' });
+            }
+        }
+
+        function hideSection() {
+            document.getElementById('admin-section').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize storage on first load
+        async function initializeSystem() {
+            try {
+                // Check if already initialized
+                const settings = await window.storage.get('clinic-settings');
+                if (!settings) {
+                    // Set default settings
+                    const defaultSettings = {
+                        centerName: 'مركز الرعاية الطبية',
+                        speechRate: 1.0,
+                        audioPath: 'https://raw.githubusercontent.com/YOUR_USERNAME/clinic-queue/main/audio/',
+                        mediaPath: 'https://raw.githubusercontent.com/YOUR_USERNAME/clinic-queue/main/media/',
+                        newsText: 'مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل'
+                    };
+                    await window.storage.set('clinic-settings', JSON.stringify(defaultSettings));
+                    
+                    // Set default clinics
+                    const defaultClinics = [
+                        { id: 1, name: 'طب الأسرة', number: 1, password: '1234', currentTicket: 0, isActive: true },
+                        { id: 2, name: 'الأسنان', number: 2, password: '1234', currentTicket: 0, isActive: true },
+                        { id: 3, name: 'الجلدية', number: 3, password: '1234', currentTicket: 0, isActive: true }
+                    ];
+                    await window.storage.set('clinic-list', JSON.stringify(defaultClinics));
+                    
+                    console.log('System initialized with default values');
+                }
+            } catch (error) {
+                console.log('Storage initialization:', error);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initializeSystem);
+    </script>
+</body>
+</html>

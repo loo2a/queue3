@@ -55,22 +55,29 @@
         <div class="text-xl" id="notificationTime"></div>
     </div>
 
+    <!-- Emergency Alert Banner -->
+    <div id="emergencyBanner" class="hidden notification-banner bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-8 text-center shadow-2xl animate-pulse">
+        <div class="text-6xl font-bold mb-4">🚨 طوارئ 🚨</div>
+        <div class="text-3xl font-bold" id="emergencyText">حالة طوارئ - يرجى الانتباه</div>
+        <div class="text-xl mt-2" id="emergencyClinic"></div>
+    </div>
+
     <!-- Main Content -->
     <div class="flex h-[calc(100vh-160px)]">
-        <!-- Clinics Panel (Right Side) -->
-        <div class="w-2/5 p-6 overflow-y-auto">
-            <h2 class="text-3xl font-bold mb-4 text-center bg-gradient-to-r from-blue-600 to-blue-700 py-3 rounded-lg shadow-lg">
+        <!-- Clinics Panel (Right Side) - أصغر -->
+        <div class="w-1/4 p-4 overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-3 text-center bg-gradient-to-r from-blue-600 to-blue-700 py-2 rounded-lg shadow-lg">
                 العيادات
             </h2>
-            <div id="clinicCards" class="space-y-4 mb-6">
+            <div id="clinicCards" class="space-y-3 mb-4">
                 <!-- Clinic cards will be inserted here -->
             </div>
 
             <!-- QR Code Section -->
-            <div class="bg-white text-black rounded-xl p-6 text-center shadow-lg">
-                <h3 class="font-bold mb-3 text-xl text-blue-800">📱 قيّم خدمتنا</h3>
-                <div id="qrCode" class="flex justify-center bg-white p-4 rounded-lg">
-                    <svg width="180" height="180" viewBox="0 0 180 180">
+            <div class="bg-white text-black rounded-xl p-4 text-center shadow-lg">
+                <h3 class="font-bold mb-2 text-lg text-blue-800">📱 قيّم خدمتنا</h3>
+                <div id="qrCode" class="flex justify-center bg-white p-3 rounded-lg">
+                    <svg width="140" height="140" viewBox="0 0 180 180">
                         <rect width="180" height="180" fill="white"/>
                         <rect x="10" y="10" width="40" height="40" fill="black"/>
                         <rect x="130" y="10" width="40" height="40" fill="black"/>
@@ -85,8 +92,8 @@
             </div>
         </div>
 
-        <!-- Media Panel (Left Side) -->
-        <div class="w-3/5 p-6">
+        <!-- Media Panel (Left Side) - أكبر -->
+        <div class="w-3/4 p-4">
             <div class="bg-black rounded-xl overflow-hidden h-full relative shadow-2xl">
                 <video id="mediaPlayer" class="w-full h-full object-contain" autoplay muted loop>
                     المتصفح لا يدعم تشغيل الفيديو
@@ -178,9 +185,9 @@
                     // Load media files
                     if (settings.mediaPath) {
                         mediaFiles = [
-                            settings.mediaPath + '1.mp4',
-                            settings.mediaPath + '2.mp4',
-                            settings.mediaPath + '3.mp4'
+                            settings.mediaPath + 'health1.mp4',
+                            settings.mediaPath + 'health2.mp4',
+                            settings.mediaPath + 'health3.mp4'
                         ];
                     }
                 }
@@ -218,19 +225,22 @@
                 
                 const card = document.createElement('div');
                 card.id = `clinic-${clinic.id}`;
-                card.className = 'bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 shadow-lg transform transition-all duration-300 hover:scale-105';
+                card.className = 'bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 shadow-lg transform transition-all duration-300 hover:scale-105';
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-2xl font-bold">${clinic.name}</h3>
-                        <span class="bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-bold">
-                            🟢 نشط
-                        </span>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-bold">${clinic.name}</h3>
+                            <span class="text-lg font-semibold text-blue-200">#${clinic.number}</span>
+                        </div>
                     </div>
-                    <div class="text-7xl font-bold text-center py-6 bg-white text-blue-900 rounded-lg shadow-inner">
+                    <div class="text-5xl font-bold text-center py-4 bg-white text-blue-900 rounded-lg shadow-inner mb-2">
                         ${clinic.currentTicket || '---'}
                     </div>
-                    <div class="text-sm mt-3 text-center text-blue-100" id="clinic-time-${clinic.id}">
-                        ${clinic.lastCall ? 'آخر نداء: ' + new Date(clinic.lastCall).toLocaleTimeString('ar-EG') : ''}
+                    <div class="flex justify-between text-xs text-blue-100">
+                        <span class="bg-green-500 px-2 py-1 rounded-full">🟢 نشط</span>
+                        <span id="clinic-time-${clinic.id}">
+                            ${clinic.lastCall ? new Date(clinic.lastCall).toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'}) : '---'}
+                        </span>
                     </div>
                 `;
                 container.appendChild(card);
@@ -360,14 +370,16 @@
 
         // Listen for instant audio
         async function listenForInstantAudio() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('instant-audio', true);
                 if (result && result.value) {
-                    const filename = result.value;
+                    const audioData = typeof result.value === 'string' ? result.value : result.value.filename || result.value;
+                    const filename = audioData;
                     
                     // Play the instant audio file
                     const audioPath = audioHandler.audioBasePath.replace('audio/', 'instant/');
-                    await audioHandler.playAudioFile(audioPath + filename);
+                    await audioHandler.playInstant(filename);
                     
                     // Clear after playing
                     await window.storage.delete('instant-audio', true);
@@ -377,6 +389,41 @@
             }
             
             setTimeout(listenForInstantAudio, 1000);
+        }
+
+        // Listen for emergency alerts
+        async function listenForEmergency() {
+            await waitForFirebase();
+            try {
+                const result = await window.storage.get('emergency-alert', true);
+                if (result && result.value) {
+                    const emergencyData = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
+                    
+                    // Show emergency banner
+                    const banner = document.getElementById('emergencyBanner');
+                    const clinicText = document.getElementById('emergencyClinic');
+                    
+                    clinicText.textContent = `من ${emergencyData.clinicName}`;
+                    banner.classList.remove('hidden');
+                    
+                    // Play emergency sound
+                    try {
+                        const audioPath = audioHandler.audioBasePath.replace('audio/', 'instant/');
+                        await audioHandler.playInstant('emergency.mp3');
+                    } catch (error) {
+                        console.error('Error playing emergency sound:', error);
+                    }
+                    
+                    // Auto hide after 10 seconds
+                    setTimeout(() => {
+                        banner.classList.add('hidden');
+                    }, 10000);
+                }
+            } catch (error) {
+                // No emergency alert
+            }
+            
+            setTimeout(listenForEmergency, 1000);
         }
 
         // Play media files
@@ -389,23 +436,31 @@
                 return;
             }
             
+            // Set current video
             player.src = mediaFiles[currentMediaIndex];
-            player.play().then(() => {
-                loading.style.display = 'none';
-            }).catch(error => {
-                console.error('Error playing video:', error);
-                loading.innerHTML = '<p class="text-xl">خطأ في تحميل الفيديو</p>';
-            });
             
+            // Play when loaded
+            player.onloadeddata = () => {
+                loading.style.display = 'none';
+                player.play().catch(error => {
+                    console.error('Error playing video:', error);
+                });
+            };
+            
+            // When video ends, play next one
             player.onended = () => {
                 currentMediaIndex = (currentMediaIndex + 1) % mediaFiles.length;
                 playNextMedia();
             };
 
-            player.onerror = () => {
-                console.error('Video error');
-                currentMediaIndex = (currentMediaIndex + 1) % mediaFiles.length;
-                setTimeout(playNextMedia, 1000);
+            // Handle errors
+            player.onerror = (e) => {
+                console.error('Video error:', e);
+                // Try next video after 2 seconds
+                setTimeout(() => {
+                    currentMediaIndex = (currentMediaIndex + 1) % mediaFiles.length;
+                    playNextMedia();
+                }, 2000);
             };
         }
 
@@ -423,6 +478,7 @@
             listenForCalls();
             listenForCustomName();
             listenForInstantAudio();
+            listenForEmergency();
             
             // Play media
             setTimeout(playNextMedia, 1000);
@@ -445,4 +501,3 @@
     </script>
 </body>
 </html>
-

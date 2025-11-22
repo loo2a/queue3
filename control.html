@@ -173,12 +173,24 @@
         let currentClinic = null;
         let clinics = [];
 
+        // Wait for Firebase
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        }
+
         // Load clinics for login
         async function loadClinicsForLogin() {
+            await waitForFirebase();
             try {
                 const result = await window.storage.get('clinic-list');
                 if (result && result.value) {
-                    clinics = JSON.parse(result.value);
+                    clinics = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
                     const select = document.getElementById('clinicSelect');
                     select.innerHTML = '<option value="">-- اختر العيادة --</option>';
                     
@@ -274,7 +286,7 @@
             };
             
             try {
-                await window.storage.set('current-call', JSON.stringify(callData), true);
+                await window.storage.set('current-call', callData, true);
                 
                 currentClinic.currentTicket = ticketNumber;
                 currentClinic.lastCall = new Date().toISOString();
@@ -283,7 +295,7 @@
                 const index = clinics.findIndex(c => c.id === currentClinic.id);
                 if (index !== -1) {
                     clinics[index] = currentClinic;
-                    await window.storage.set('clinic-list', JSON.stringify(clinics));
+                    await window.storage.set('clinic-list', clinics);
                 }
                 
                 updateDisplay();

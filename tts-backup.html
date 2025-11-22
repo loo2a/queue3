@@ -12,10 +12,13 @@
             <h1 class="text-4xl font-bold mb-6 text-center text-green-800">🎤 اختبار النطق الصحيح للأرقام</h1>
             
             <div class="bg-green-50 p-6 rounded-lg mb-6">
-                <h2 class="text-2xl font-bold mb-4 text-green-800">✅ النطق الصحيح الآن:</h2>
+                <h2 class="text-2xl font-bold mb-4 text-green-800">✅ النطق الصحيح (محدث):</h2>
                 <div class="space-y-3 text-lg">
                     <div class="bg-white p-3 rounded">
                         <strong>5</strong> → <code class="text-blue-600">5.mp3</code> = خمسة ✓
+                    </div>
+                    <div class="bg-white p-3 rounded">
+                        <strong>15</strong> → <code class="text-blue-600">15.mp3</code> = خمسة عشر (حالة خاصة 11-19) ✓
                     </div>
                     <div class="bg-white p-3 rounded">
                         <strong>65</strong> → <code class="text-blue-600">5.mp3 + and.mp3 + 60.mp3</code> = خمسة وستون ✓
@@ -27,7 +30,7 @@
                         <strong>105</strong> → <code class="text-blue-600">100.mp3 + and.mp3 + 5.mp3</code> = مائة وخمسة ✓
                     </div>
                     <div class="bg-white p-3 rounded">
-                        <strong>520</strong> → <code class="text-blue-600">500.mp3 + and.mp3 + 20.mp3</code> = خمسمائة وعشرون ✓
+                        <strong>215</strong> → <code class="text-blue-600">200.mp3 + and.mp3 + 15.mp3</code> = مئتان وخمسة عشر ✓
                     </div>
                 </div>
             </div>
@@ -37,21 +40,33 @@
                     <div class="text-4xl font-bold mb-2">5</div>
                     <div class="text-sm">خمسة</div>
                 </button>
+                <button onclick="testNumber(15)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">15</div>
+                    <div class="text-sm">خمسة عشر</div>
+                </button>
                 <button onclick="testNumber(65)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
                     <div class="text-4xl font-bold mb-2">65</div>
                     <div class="text-sm">خمسة وستون</div>
-                </button>
-                <button onclick="testNumber(456)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">456</div>
-                    <div class="text-sm">أربعمائة وستة وخمسون</div>
                 </button>
                 <button onclick="testNumber(105)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
                     <div class="text-4xl font-bold mb-2">105</div>
                     <div class="text-sm">مائة وخمسة</div>
                 </button>
-                <button onclick="testNumber(520)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                <button onclick="testNumber(215)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">215</div>
+                    <div class="text-sm">مئتان وخمسة عشر</div>
+                </button>
+                <button onclick="testNumber(456)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">456</div>
+                    <div class="text-sm">أربعمائة وستة وخمسون</div>
+                </button>
+                <button onclick="testNumber(520)" class="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition shadow-lg">
                     <div class="text-4xl font-bold mb-2">520</div>
                     <div class="text-sm">خمسمائة وعشرون</div>
+                </button>
+                <button onclick="testNumber(918)" class="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">918</div>
+                    <div class="text-sm">تسعمائة وثمانية عشر</div>
                 </button>
                 <button onclick="testNumber(999)" class="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition shadow-lg">
                     <div class="text-4xl font-bold mb-2">999</div>

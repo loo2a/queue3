@@ -3,280 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار النطق الاحتياطي - TTS Backup</title>
+    <title>اختبار النطق الصحيح</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-purple-900 to-indigo-900 min-h-screen text-white p-8" dir="rtl">
+<body class="bg-gradient-to-br from-green-900 to-teal-900 min-h-screen text-white p-8" dir="rtl">
     <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8">
-            <h1 class="text-4xl font-bold mb-4">🔊 اختبار نظام النطق الاحتياطي</h1>
-            <p class="text-xl text-blue-200">هذه الصفحة تختبر نظام Text-to-Speech المدمج في المتصفح</p>
-        </div>
-
-        <!-- Voice Selection -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8">
-            <h2 class="text-2xl font-bold mb-4">اختيار الصوت</h2>
-            <select id="voiceSelect" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white">
-                <option value="">جاري تحميل الأصوات...</option>
-            </select>
-            <p class="text-sm text-blue-200 mt-2">اختر صوت عربي للحصول على أفضل نطق</p>
-        </div>
-
-        <!-- Test Controls -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8">
-            <h2 class="text-2xl font-bold mb-4">اختبار النطق</h2>
+        <div class="bg-white text-gray-800 rounded-2xl shadow-2xl p-8 mb-6">
+            <h1 class="text-4xl font-bold mb-6 text-center text-green-800">🎤 اختبار النطق الصحيح للأرقام</h1>
             
-            <div class="mb-6">
-                <label class="block mb-2 font-semibold">النص للنطق:</label>
-                <textarea id="testText" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" rows="3">على العميل رقم مائة وخمسة وستون عيادة طب الأسرة</textarea>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label class="block mb-2 font-semibold">السرعة (Speed):</label>
-                    <input type="range" id="rateInput" min="0.5" max="2" step="0.1" value="1" class="w-full">
-                    <span id="rateValue" class="text-blue-200">1.0x</span>
-                </div>
-                <div>
-                    <label class="block mb-2 font-semibold">درجة الصوت (Pitch):</label>
-                    <input type="range" id="pitchInput" min="0.5" max="2" step="0.1" value="1" class="w-full">
-                    <span id="pitchValue" class="text-blue-200">1.0</span>
+            <div class="bg-green-50 p-6 rounded-lg mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-green-800">✅ النطق الصحيح الآن:</h2>
+                <div class="space-y-2 text-lg">
+                    <p>• <strong>54</strong> → أربعة وخمسون ✓</p>
+                    <p>• <strong>123</strong> → ثلاثة وعشرون ومائة ✓</p>
+                    <p>• <strong>468</strong> → ثمانية وستون وأربعمائة ✓</p>
+                    <p>• <strong>305</strong> → خمسة وثلاثمائة ✓</p>
                 </div>
             </div>
 
-            <div class="flex gap-4">
-                <button onclick="speakText()" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
-                    🔊 نطق النص
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <button onclick="testNumber(5)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">5</div>
+                    <div class="text-sm">خمسة</div>
                 </button>
-                <button onclick="stopSpeaking()" class="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">
-                    🛑 إيقاف
+                <button onclick="testNumber(54)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">54</div>
+                    <div class="text-sm">أربعة وخمسون</div>
+                </button>
+                <button onclick="testNumber(123)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">123</div>
+                    <div class="text-sm">ثلاثة وعشرون ومائة</div>
+                </button>
+                <button onclick="testNumber(305)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">305</div>
+                    <div class="text-sm">خمسة وثلاثمائة</div>
+                </button>
+                <button onclick="testNumber(468)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">468</div>
+                    <div class="text-sm">ثمانية وستون وأربعمائة</div>
+                </button>
+                <button onclick="testNumber(999)" class="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition shadow-lg">
+                    <div class="text-4xl font-bold mb-2">999</div>
+                    <div class="text-sm">تسعة وتسعون وتسعمائة</div>
                 </button>
             </div>
-        </div>
 
-        <!-- Number Testing -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8">
-            <h2 class="text-2xl font-bold mb-4">اختبار الأرقام</h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <button onclick="testNumber(5)" class="bg-blue-600 p-4 rounded-lg hover:bg-blue-700 transition font-bold">5</button>
-                <button onclick="testNumber(25)" class="bg-blue-600 p-4 rounded-lg hover:bg-blue-700 transition font-bold">25</button>
-                <button onclick="testNumber(100)" class="bg-blue-600 p-4 rounded-lg hover:bg-blue-700 transition font-bold">100</button>
-                <button onclick="testNumber(468)" class="bg-blue-600 p-4 rounded-lg hover:bg-blue-700 transition font-bold">468</button>
-            </div>
-
-            <div class="flex gap-4">
-                <input type="number" id="customNumber" placeholder="رقم مخصص" class="flex-1 p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white">
-                <button onclick="testCustomNumber()" class="bg-purple-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-purple-700 transition">
-                    اختبار
-                </button>
-            </div>
-        </div>
-
-        <!-- Call Simulation -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8">
-            <h2 class="text-2xl font-bold mb-4">محاكاة النداء الكامل</h2>
-            
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block mb-2 font-semibold">رقم التذكرة:</label>
-                    <input type="number" id="ticketNumber" value="123" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white">
-                </div>
-                <div>
-                    <label class="block mb-2 font-semibold">اسم العيادة:</label>
-                    <input type="text" id="clinicName" value="عيادة طب الأسرة" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white">
+            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                <h3 class="font-bold mb-2">اختبار رقم مخصص:</h3>
+                <div class="flex gap-2">
+                    <input type="number" id="customNumber" placeholder="أدخل رقم (0-999)" class="flex-1 p-3 border-2 rounded-lg" min="0" max="999">
+                    <button onclick="testCustomNumber()" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 font-bold">
+                        اختبار
+                    </button>
                 </div>
             </div>
 
-            <button onclick="simulateFullCall()" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-bold hover:from-green-700 hover:to-blue-700 transition text-xl">
-                🎤 محاكاة النداء الكامل
-            </button>
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <h3 class="font-bold mb-2 text-yellow-800">📋 تسلسل الملفات:</h3>
+                <div id="fileSequence" class="text-sm text-gray-700 font-mono bg-white p-3 rounded">
+                    اختر رقماً لعرض تسلسل الملفات
+                </div>
+            </div>
         </div>
 
-        <!-- Voice Info -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8">
-            <h2 class="text-2xl font-bold mb-4">معلومات الصوت الحالي</h2>
-            <div id="voiceInfo" class="space-y-2 text-blue-200">
-                <p>اسم الصوت: <span id="voiceName" class="text-white font-semibold">---</span></p>
-                <p>اللغة: <span id="voiceLang" class="text-white font-semibold">---</span></p>
-                <p>محلي: <span id="voiceLocal" class="text-white font-semibold">---</span></p>
-            </div>
+        <div class="text-center">
+            <a href="index.html" class="text-blue-200 hover:text-white underline">← العودة للصفحة الرئيسية</a>
         </div>
     </div>
 
+    <script src="js/firebase-config.js"></script>
+    <script src="js/audio-handler.js"></script>
     <script>
-        let voices = [];
-        let selectedVoice = null;
+        let audioHandler;
 
-        // Number to Arabic text conversion
-        const numberToArabic = (num) => {
-            const units = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
-            const tens = ['', 'عشرة', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+        async function init() {
+            // Wait for dependencies
+            await new Promise(resolve => {
+                const check = () => {
+                    if (window.AudioHandler) {
+                        resolve();
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                check();
+            });
+
+            audioHandler = new AudioHandler();
+            console.log('✅ Audio Handler ready');
+        }
+
+        function testNumber(num) {
+            if (!audioHandler) {
+                alert('جاري التحميل... يرجى الانتظار');
+                return;
+            }
+
+            const files = audioHandler.numberToAudioFiles(num);
+            
+            // Display sequence
+            const sequenceDiv = document.getElementById('fileSequence');
+            sequenceDiv.innerHTML = `
+                <strong>الرقم ${num}:</strong><br>
+                التسلسل: ${files.join(' → ')}<br>
+                <span class="text-green-600">عدد الملفات: ${files.length}</span>
+            `;
+
+            // Play audio (mock - since we don't have actual files)
+            console.log(`Playing: ${files.join(' → ')}`);
+            
+            // Use TTS as fallback
+            const arabicText = getArabicText(num);
+            speak(arabicText);
+        }
+
+        function testCustomNumber() {
+            const num = parseInt(document.getElementById('customNumber').value);
+            if (isNaN(num) || num < 0 || num > 999) {
+                alert('يرجى إدخال رقم بين 0 و 999');
+                return;
+            }
+            testNumber(num);
+        }
+
+        function getArabicText(num) {
+            const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+            const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
             const hundreds = ['', 'مائة', 'مئتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
-            
+
             if (num === 0) return 'صفر';
-            
-            let result = [];
-            
-            // Hundreds
+            if (num < 10) return ones[num];
+            if (num === 10) return 'عشرة';
+            if (num < 20) {
+                const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+                return teens[num - 10];
+            }
+
             const h = Math.floor(num / 100);
+            const remainder = num % 100;
+            const t = Math.floor(remainder / 10);
+            const o = remainder % 10;
+
+            let result = [];
+
+            // Ones first (Arabic order)
+            if (o > 0 && t > 0) {
+                result.push(ones[o]);
+            }
+
+            // Tens
+            if (t > 0) {
+                result.push(tens[t]);
+            } else if (o > 0 && h > 0) {
+                result.push(ones[o]);
+            }
+
+            // Hundreds
             if (h > 0) {
                 result.push(hundreds[h]);
             }
-            
-            // Tens and units
-            const remainder = num % 100;
-            const t = Math.floor(remainder / 10);
-            const u = remainder % 10;
-            
-            if (t > 0) {
-                result.push(tens[t]);
-            }
-            
-            if (u > 0) {
-                result.push(units[u]);
-            }
-            
+
             return result.join(' و ');
-        };
+        }
 
-        // Load voices
-        function loadVoices() {
-            voices = speechSynthesis.getVoices();
-            const select = document.getElementById('voiceSelect');
-            select.innerHTML = '';
-            
-            // Filter for Arabic voices first
-            const arabicVoices = voices.filter(v => v.lang.startsWith('ar'));
-            const otherVoices = voices.filter(v => !v.lang.startsWith('ar'));
-            
-            if (arabicVoices.length > 0) {
-                const arabicGroup = document.createElement('optgroup');
-                arabicGroup.label = 'أصوات عربية';
-                arabicVoices.forEach((voice, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = `${voice.name} (${voice.lang})`;
-                    arabicGroup.appendChild(option);
-                });
-                select.appendChild(arabicGroup);
-                
-                // Select first Arabic voice by default
-                selectedVoice = arabicVoices[0];
-                updateVoiceInfo();
-            }
-            
-            if (otherVoices.length > 0) {
-                const otherGroup = document.createElement('optgroup');
-                otherGroup.label = 'أصوات أخرى';
-                otherVoices.forEach((voice, index) => {
-                    const option = document.createElement('option');
-                    option.value = arabicVoices.length + index;
-                    option.textContent = `${voice.name} (${voice.lang})`;
-                    otherGroup.appendChild(option);
-                });
-                select.appendChild(otherGroup);
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
             }
         }
 
-        // Update voice info
-        function updateVoiceInfo() {
-            if (selectedVoice) {
-                document.getElementById('voiceName').textContent = selectedVoice.name;
-                document.getElementById('voiceLang').textContent = selectedVoice.lang;
-                document.getElementById('voiceLocal').textContent = selectedVoice.localService ? 'نعم' : 'لا';
-            }
-        }
-
-        // Voice selection change
-        document.getElementById('voiceSelect').addEventListener('change', (e) => {
-            selectedVoice = voices[parseInt(e.target.value)];
-            updateVoiceInfo();
-        });
-
-        // Rate change
-        document.getElementById('rateInput').addEventListener('input', (e) => {
-            document.getElementById('rateValue').textContent = e.target.value + 'x';
-        });
-
-        // Pitch change
-        document.getElementById('pitchInput').addEventListener('input', (e) => {
-            document.getElementById('pitchValue').textContent = e.target.value;
-        });
-
-        // Speak text
-        function speakText() {
-            const text = document.getElementById('testText').value;
-            const rate = parseFloat(document.getElementById('rateInput').value);
-            const pitch = parseFloat(document.getElementById('pitchInput').value);
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.voice = selectedVoice;
-            utterance.rate = rate;
-            utterance.pitch = pitch;
-            utterance.lang = 'ar-SA';
-            
-            speechSynthesis.speak(utterance);
-        }
-
-        // Stop speaking
-        function stopSpeaking() {
-            speechSynthesis.cancel();
-        }
-
-        // Test number
-        function testNumber(num) {
-            const text = numberToArabic(num);
-            const rate = parseFloat(document.getElementById('rateInput').value);
-            const pitch = parseFloat(document.getElementById('pitchInput').value);
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.voice = selectedVoice;
-            utterance.rate = rate;
-            utterance.pitch = pitch;
-            utterance.lang = 'ar-SA';
-            
-            speechSynthesis.speak(utterance);
-        }
-
-        // Test custom number
-        function testCustomNumber() {
-            const num = parseInt(document.getElementById('customNumber').value);
-            if (!isNaN(num) && num >= 0) {
-                testNumber(num);
-            } else {
-                alert('يرجى إدخال رقم صحيح');
-            }
-        }
-
-        // Simulate full call
-        function simulateFullCall() {
-            const ticketNum = parseInt(document.getElementById('ticketNumber').value);
-            const clinic = document.getElementById('clinicName').value;
-            const rate = parseFloat(document.getElementById('rateInput').value);
-            const pitch = parseFloat(document.getElementById('pitchInput').value);
-            
-            const text = `على العميل رقم ${numberToArabic(ticketNum)} ${clinic}`;
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.voice = selectedVoice;
-            utterance.rate = rate;
-            utterance.pitch = pitch;
-            utterance.lang = 'ar-SA';
-            
-            speechSynthesis.speak(utterance);
-        }
-
-        // Initialize
-        window.addEventListener('load', () => {
-            loadVoices();
-            
-            // Chrome requires this event
-            if (speechSynthesis.onvoiceschanged !== undefined) {
-                speechSynthesis.onvoiceschanged = loadVoices;
-            }
-        });
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>

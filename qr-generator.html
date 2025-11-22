@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد QR Code للمركز</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-teal-900 to-blue-900 min-h-screen text-white p-8" dir="rtl">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8 text-center">
+            <h1 class="text-5xl font-bold mb-4">📱 مولد رموز QR</h1>
+            <p class="text-xl text-blue-200">أنشئ رموز QR لنظام نداء المرضى</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Generator Section -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8">
+                <h2 class="text-3xl font-bold mb-6">إنشاء QR Code</h2>
+                
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block mb-2 font-semibold text-lg">نوع الرمز:</label>
+                        <select id="qrType" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()">
+                            <option value="website">رابط الموقع</option>
+                            <option value="feedback">استبيان التقييم</option>
+                            <option value="contact">معلومات الاتصال</option>
+                            <option value="wifi">شبكة WiFi</option>
+                            <option value="custom">نص مخصص</option>
+                        </select>
+                    </div>
+
+                    <!-- Website URL -->
+                    <div id="websiteSection" class="qr-section">
+                        <label class="block mb-2 font-semibold">رابط الموقع:</label>
+                        <input type="url" id="websiteUrl" value="https://example.com" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()">
+                    </div>
+
+                    <!-- Feedback Form -->
+                    <div id="feedbackSection" class="qr-section hidden">
+                        <label class="block mb-2 font-semibold">رابط استبيان Google Forms:</label>
+                        <input type="url" id="feedbackUrl" placeholder="https://forms.gle/xxxxx" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()">
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div id="contactSection" class="qr-section hidden">
+                        <label class="block mb-2 font-semibold">معلومات المركز:</label>
+                        <input type="text" id="centerName" placeholder="اسم المركز" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white mb-2" onchange="updatePreview()">
+                        <input type="tel" id="centerPhone" placeholder="رقم الهاتف" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white mb-2" onchange="updatePreview()">
+                        <input type="email" id="centerEmail" placeholder="البريد الإلكتروني" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()">
+                    </div>
+
+                    <!-- WiFi -->
+                    <div id="wifiSection" class="qr-section hidden">
+                        <label class="block mb-2 font-semibold">معلومات الشبكة:</label>
+                        <input type="text" id="wifiSsid" placeholder="اسم الشبكة (SSID)" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white mb-2" onchange="updatePreview()">
+                        <input type="text" id="wifiPassword" placeholder="كلمة المرور" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white mb-2" onchange="updatePreview()">
+                        <select id="wifiSecurity" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="">بدون حماية</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Text -->
+                    <div id="customSection" class="qr-section hidden">
+                        <label class="block mb-2 font-semibold">النص المخصص:</label>
+                        <textarea id="customText" rows="4" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()"></textarea>
+                    </div>
+
+                    <!-- Size -->
+                    <div>
+                        <label class="block mb-2 font-semibold">الحجم:</label>
+                        <select id="qrSize" class="w-full p-3 rounded-lg bg-gray-800 border-2 border-blue-400 text-white" onchange="updatePreview()">
+                            <option value="200">صغير (200x200)</option>
+                            <option value="300" selected>متوسط (300x300)</option>
+                            <option value="400">كبير (400x400)</option>
+                            <option value="600">كبير جداً (600x600)</option>
+                        </select>
+                    </div>
+
+                    <!-- Color -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 font-semibold">لون الرمز:</label>
+                            <input type="color" id="qrColor" value="#000000" class="w-full h-12 rounded-lg" onchange="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block mb-2 font-semibold">لون الخلفية:</label>
+                            <input type="color" id="qrBgColor" value="#ffffff" class="w-full h-12 rounded-lg" onchange="updatePreview()">
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="generateQR()" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-bold hover:from-green-700 hover:to-blue-700 transition text-xl">
+                    🔄 إنشاء الرمز
+                </button>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8">
+                <h2 class="text-3xl font-bold mb-6 text-center">معاينة الرمز</h2>
+                
+                <div class="bg-white rounded-xl p-8 mb-6 flex items-center justify-center min-h-[400px]">
+                    <div id="qrcode" class="flex items-center justify-center"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <button onclick="downloadQR()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                        💾 تحميل كصورة PNG
+                    </button>
+                    <button onclick="printQR()" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition">
+                        🖨️ طباعة الرمز
+                    </button>
+                </div>
+
+                <!-- Info -->
+                <div class="mt-6 p-4 bg-blue-900 bg-opacity-50 rounded-lg">
+                    <p class="text-sm text-blue-200">
+                        💡 <strong>نصيحة:</strong> ضع رموز QR في أماكن واضحة بالمركز لتسهيل وصول المرضى للخدمات
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates Section -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mt-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">قوالب جاهزة</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer" onclick="loadTemplate('website')">
+                    <div class="text-5xl mb-4">🌐</div>
+                    <h3 class="text-xl font-bold mb-2">موقع المركز</h3>
+                    <p class="text-sm text-gray-300">رابط للموقع الإلكتروني</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer" onclick="loadTemplate('feedback')">
+                    <div class="text-5xl mb-4">📋</div>
+                    <h3 class="text-xl font-bold mb-2">تقييم الخدمة</h3>
+                    <p class="text-sm text-gray-300">استبيان رضا المرضى</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer" onclick="loadTemplate('contact')">
+                    <div class="text-5xl mb-4">📞</div>
+                    <h3 class="text-xl font-bold mb-2">معلومات الاتصال</h3>
+                    <p class="text-sm text-gray-300">رقم وعنوان المركز</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer" onclick="loadTemplate('wifi')">
+                    <div class="text-5xl mb-4">📶</div>
+                    <h3 class="text-xl font-bold mb-2">WiFi المركز</h3>
+                    <p class="text-sm text-gray-300">الاتصال التلقائي بالشبكة</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer" onclick="loadTemplate('appointment')">
+                    <div class="text-5xl mb-4">📅</div>
+                    <h3 class="text-xl font-bold mb-2">حجز موعد</h3>
+                    <p class="text-sm text-gray-300">نظام الحجز الإلكتروني</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer" onclick="loadTemplate('emergency')">
+                    <div class="text-5xl mb-4">🚑</div>
+                    <h3 class="text-xl font-bold mb-2">طوارئ</h3>
+                    <p class="text-sm text-gray-300">أرقام الطوارئ السريعة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let qr = null;
+
+        function getQRContent() {
+            const type = document.getElementById('qrType').value;
+            
+            switch(type) {
+                case 'website':
+                    return document.getElementById('websiteUrl').value;
+                
+                case 'feedback':
+                    return document.getElementById('feedbackUrl').value;
+                
+                case 'contact':
+                    const name = document.getElementById('centerName').value;
+                    const phone = document.getElementById('centerPhone').value;
+                    const email = document.getElementById('centerEmail').value;
+                    return `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
+                
+                case 'wifi':
+                    const ssid = document.getElementById('wifiSsid').value;
+                    const password = document.getElementById('wifiPassword').value;
+                    const security = document.getElementById('wifiSecurity').value;
+                    return `WIFI:T:${security};S:${ssid};P:${password};;`;
+                
+                case 'custom':
+                    return document.getElementById('customText').value;
+                
+                default:
+                    return 'https://example.com';
+            }
+        }
+
+        function updatePreview() {
+            const type = document.getElementById('qrType').value;
+            
+            // Hide all sections
+            document.querySelectorAll('.qr-section').forEach(s => s.classList.add('hidden'));
+            
+            // Show relevant section
+            document.getElementById(type + 'Section')?.classList.remove('hidden');
+        }
+
+        function generateQR() {
+            const content = getQRContent();
+            const size = parseInt(document.getElementById('qrSize').value);
+            const color = document.getElementById('qrColor').value;
+            const bgColor = document.getElementById('qrBgColor').value;
+            
+            // Clear previous QR
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generate new QR
+            qr = new QRCode(document.getElementById('qrcode'), {
+                text: content,
+                width: size,
+                height: size,
+                colorDark: color,
+                colorLight: bgColor,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'qr-code.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            } else {
+                alert('يرجى إنشاء رمز QR أولاً');
+            }
+        }
+
+        function printQR() {
+            const qrDiv = document.getElementById('qrcode');
+            if (qrDiv.innerHTML) {
+                const printWindow = window.open('', '', 'width=600,height=600');
+                printWindow.document.write('<html><head><title>طباعة QR Code</title></head><body>');
+                printWindow.document.write('<div style="text-align:center">');
+                printWindow.document.write(qrDiv.innerHTML);
+                printWindow.document.write('</div></body></html>');
+                printWindow.document.close();
+                printWindow.print();
+            } else {
+                alert('يرجى إنشاء رمز QR أولاً');
+            }
+        }
+
+        function loadTemplate(template) {
+            document.getElementById('qrType').value = template;
+            
+            switch(template) {
+                case 'website':
+                    document.getElementById('websiteUrl').value = 'https://YOUR_USERNAME.github.io/clinic-queue/';
+                    break;
+                
+                case 'feedback':
+                    document.getElementById('feedbackUrl').value = 'https://forms.gle/example';
+                    break;
+                
+                case 'contact':
+                    document.getElementById('centerName').value = 'مركز الرعاية الطبية';
+                    document.getElementById('centerPhone').value = '+966 12 345 6789';
+                    document.getElementById('centerEmail').value = 'info@clinic.com';
+                    break;
+                
+                case 'wifi':
+                    document.getElementById('wifiSsid').value = 'Clinic_WiFi';
+                    document.getElementById('wifiPassword').value = 'password123';
+                    break;
+                
+                case 'appointment':
+                    document.getElementById('qrType').value = 'website';
+                    document.getElementById('websiteUrl').value = 'https://YOUR_USERNAME.github.io/clinic-queue/appointment.html';
+                    break;
+                
+                case 'emergency':
+                    document.getElementById('qrType').value = 'custom';
+                    document.getElementById('customText').value = 'طوارئ: 911\nاستعلامات: 123456789\nالموقع: شارع الملك فهد';
+                    break;
+            }
+            
+            updatePreview();
+            generateQR();
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            generateQR();
+        });
+    </script>
+</body>
+</html>

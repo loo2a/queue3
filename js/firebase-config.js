@@ -13,16 +13,17 @@
 
 // Firebase configuration object
 // Replace these values with your own from Firebase Console
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBZVlnPtq8ZD-dCV4Fn6EOnm0WpXr49Vdk",
+  authDomain: "queue6-1b599.firebaseapp.com",
+  databaseURL: "https://queue6-1b599-default-rtdb.firebaseio.com",
+  projectId: "queue6-1b599",
+  storageBucket: "queue6-1b599.firebasestorage.app",
+  messagingSenderId: "233840176698",
+  appId: "1:233840176698:web:11bf68a36a6f1ce3534f03",
+  measurementId: "G-KGH923MY7X"
+};
 /**
  * Recommended Database Rules for Development:
  * 

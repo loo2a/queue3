@@ -185,13 +185,26 @@
         </div>
     </div>
 
+    <script src="js/firebase-config.js"></script>
     <script>
+        // Wait for Firebase to load
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        }
+
         // Initialize default data on first load
         async function initializeSystem() {
+            await waitForFirebase();
             try {
                 // Check if settings exist
                 const settingsResult = await window.storage.get('clinic-settings');
-                if (!settingsResult) {
+                if (!settingsResult || !settingsResult.value) {
                     // Set default settings
                     const defaultSettings = {
                         centerName: 'مركز الرعاية الطبية',

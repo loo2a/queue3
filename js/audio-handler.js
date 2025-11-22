@@ -20,7 +20,14 @@ class AudioHandler {
     this.audioBasePath = path.endsWith('/') ? path : path + '/';
   }
 
-  /** Correct Arabic number ordering */
+  /** 
+   * Correct Arabic number ordering 
+   * Examples:
+   * 5 → [5.mp3]
+   * 65 → [5.mp3, and.mp3, 60.mp3] 
+   * 456 → [400.mp3, and.mp3, 6.mp3, and.mp3, 50.mp3]
+   * 15 → [15.mp3] (special case)
+   */
   numberToAudioFiles(number) {
     const files = [];
     let num = parseInt(number, 10);
@@ -151,6 +158,7 @@ class AudioHandler {
 
     try {
       const seq = this.buildCallSequence(ticketNumber, clinicNumber);
+      console.log(`🔊 Playing sequence for ${ticketNumber}:`, seq);
       await this.playSequence(seq);
       return true;
     } catch (err) {
@@ -181,13 +189,23 @@ class AudioHandler {
   }
 
   async testAudio() {
+    console.log('🧪 Testing audio system...');
     try {
+      console.log('Test 1: Number 5');
       await this.callTicket(5, 1, 'عيادة طب الأسرة');
       await new Promise(r => setTimeout(r, 1000));
-      await this.callTicket(468, 2, 'عيادة الأسنان');
+      
+      console.log('Test 2: Number 65');
+      await this.callTicket(65, 1, 'عيادة طب الأسرة');
+      await new Promise(r => setTimeout(r, 1000));
+      
+      console.log('Test 3: Number 456');
+      await this.callTicket(456, 2, 'عيادة الأسنان');
+      
+      console.log('✅ Audio test completed');
       return true;
     } catch (err) {
-      console.error('Audio test failed:', err);
+      console.error('❌ Audio test failed:', err);
       return false;
     }
   }

@@ -1,20 +1,8 @@
 /**
  * Firebase Configuration for Clinic Queue System
- * 
- * Instructions:
- * 1. Go to https://console.firebase.google.com/
- * 2. Create a new project or select existing one
- * 3. Go to Project Settings > General
- * 4. Scroll down to "Your apps" and click Web icon (</>)
- * 5. Copy the configuration object and paste it below
- * 6. Enable Realtime Database in Firebase Console
- * 7. Set database rules to allow read/write (for development)
  */
 
-// Firebase configuration object
-// Replace these values with your own from Firebase Console
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBZVlnPtq8ZD-dCV4Fn6EOnm0WpXr49Vdk",
   authDomain: "queue6-1b599.firebaseapp.com",
@@ -25,41 +13,8 @@ const firebaseConfig = {
   appId: "1:233840176698:web:11bf68a36a6f1ce3534f03",
   measurementId: "G-KGH923MY7X"
 };
-/**
- * Recommended Database Rules for Development:
- * 
- * {
- *   "rules": {
- *     ".read": true,
- *     ".write": true
- *   }
- * }
- * 
- * For Production (more secure):
- * 
- * {
- *   "rules": {
- *     "clinics": {
- *       ".read": true,
- *       ".write": "auth != null"
- *     },
- *     "calls": {
- *       ".read": true,
- *       ".write": true
- *     },
- *     "settings": {
- *       ".read": true,
- *       ".write": "auth != null"
- *     },
- *     "display": {
- *       ".read": true,
- *       ".write": true
- *     }
- *   }
- * }
- */
 
-// Database paths structure
+// Database paths
 const DB_PATHS = {
   CLINICS: 'clinics',
   CALLS: 'calls',
@@ -69,77 +24,42 @@ const DB_PATHS = {
   CUSTOM_NAME: 'custom_name'
 };
 
-// Initialize Firebase (if using Firebase SDK)
-function initializeFirebase() {
-  if (typeof firebase !== 'undefined') {
-    try {
-      firebase.initializeApp(firebaseConfig);
-      const database = firebase.database();
-      console.log('Firebase initialized successfully');
-      return database;
-    } catch (error) {
-      console.error('Error initializing Firebase:', error);
-      return null;
-    }
-  } else {
-    console.warn('Firebase SDK not loaded. Make sure to include Firebase scripts in your HTML.');
-    return null;
-  }
-}
-
-// Alternative: Use Firebase REST API (no SDK needed)
-class FirebaseREST {
+// Firebase REST API Class
+class FirebaseStorage {
   constructor(databaseURL) {
-    this.baseURL = databaseURL;
+    this.baseURL = databaseURL.replace(/\/$/, ''); // Remove trailing slash
   }
 
   // Get data
-  async get(path) {
+  async get(path, shared = false) {
     try {
       const response = await fetch(`${this.baseURL}/${path}.json`);
-      return await response.json();
+      const data = await response.json();
+      if (data === null) return null;
+      return { value: data };
     } catch (error) {
       console.error('Error getting data:', error);
-      return null;
+      throw error;
     }
   }
 
   // Set data
-  async set(path, data) {
+  async set(path, data, shared = false) {
     try {
       const response = await fetch(`${this.baseURL}/${path}.json`, {
         method: 'PUT',
         body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       return await response.json();
     } catch (error) {
       console.error('Error setting data:', error);
-      return null;
-    }
-  }
-
-  // Update data
-  async update(path, data) {
-    try {
-      const response = await fetch(`${this.baseURL}/${path}.json`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      return await response.json();
-    } catch (error) {
-      console.error('Error updating data:', error);
-      return null;
+      throw error;
     }
   }
 
   // Delete data
-  async delete(path) {
+  async delete(path, shared = false) {
     try {
       const response = await fetch(`${this.baseURL}/${path}.json`, {
         method: 'DELETE'
@@ -147,20 +67,40 @@ class FirebaseREST {
       return await response.json();
     } catch (error) {
       console.error('Error deleting data:', error);
-      return null;
+      throw error;
     }
   }
 
-  // Listen to changes (polling method)
+  // Update data (PATCH)
+  async update(path, data) {
+    try {
+      const response = await fetch(`${this.baseURL}/${path}.json`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating data:', error);
+      throw error;
+    }
+  }
+
+  // Listen to changes (real-time)
   listen(path, callback, interval = 1000) {
     let lastData = null;
     
     const checkChanges = async () => {
-      const data = await this.get(path);
-      
-      if (JSON.stringify(data) !== JSON.stringify(lastData)) {
-        lastData = data;
-        callback(data);
+      try {
+        const result = await this.get(path);
+        const currentData = result ? result.value : null;
+        
+        if (JSON.stringify(currentData) !== JSON.stringify(lastData)) {
+          lastData = currentData;
+          callback(currentData);
+        }
+      } catch (error) {
+        console.error('Error listening:', error);
       }
     };
 
@@ -175,35 +115,48 @@ class FirebaseREST {
   }
 }
 
-// Create instance
-const firebaseREST = new FirebaseREST(firebaseConfig.databaseURL);
+// Create global storage instance
+const storage = new FirebaseStorage(firebaseConfig.databaseURL);
 
-// Helper functions for common operations
+// Make it available globally as window.storage
+window.storage = storage;
+
+// Helper functions
 const FirebaseHelper = {
   // Get all clinics
   async getClinics() {
-    return await firebaseREST.get(DB_PATHS.CLINICS);
+    try {
+      const result = await storage.get(DB_PATHS.CLINICS);
+      return result ? result.value : null;
+    } catch (error) {
+      return null;
+    }
   },
 
   // Save clinics
   async saveClinics(clinics) {
-    return await firebaseREST.set(DB_PATHS.CLINICS, clinics);
+    return await storage.set(DB_PATHS.CLINICS, clinics);
   },
 
   // Get settings
   async getSettings() {
-    return await firebaseREST.get(DB_PATHS.SETTINGS);
+    try {
+      const result = await storage.get(DB_PATHS.SETTINGS);
+      return result ? result.value : null;
+    } catch (error) {
+      return null;
+    }
   },
 
   // Save settings
   async saveSettings(settings) {
-    return await firebaseREST.set(DB_PATHS.SETTINGS, settings);
+    return await storage.set(DB_PATHS.SETTINGS, settings);
   },
 
   // Send call
   async sendCall(callData) {
     const timestamp = Date.now();
-    return await firebaseREST.set(`${DB_PATHS.CALLS}/${timestamp}`, {
+    return await storage.set(`${DB_PATHS.CALLS}/${timestamp}`, {
       ...callData,
       timestamp
     });
@@ -211,7 +164,8 @@ const FirebaseHelper = {
 
   // Get latest call
   async getLatestCall() {
-    const calls = await firebaseREST.get(DB_PATHS.CALLS);
+    const result = await storage.get(DB_PATHS.CALLS);
+    const calls = result ? result.value : null;
     if (!calls) return null;
     
     const timestamps = Object.keys(calls).sort().reverse();
@@ -219,8 +173,8 @@ const FirebaseHelper = {
   },
 
   // Listen to calls
-  listenToCalls(callback, interval = 1000) {
-    return firebaseREST.listen(DB_PATHS.CALLS, (data) => {
+  listenToCalls(callback, interval = 500) {
+    return storage.listen(DB_PATHS.CALLS, (data) => {
       if (data) {
         const timestamps = Object.keys(data).sort().reverse();
         if (timestamps.length > 0) {
@@ -232,7 +186,7 @@ const FirebaseHelper = {
 
   // Set display name
   async setDisplayName(name) {
-    return await firebaseREST.set(DB_PATHS.CUSTOM_NAME, {
+    return await storage.set(DB_PATHS.CUSTOM_NAME, {
       name,
       timestamp: Date.now()
     });
@@ -240,12 +194,13 @@ const FirebaseHelper = {
 
   // Get display name
   async getDisplayName() {
-    return await firebaseREST.get(DB_PATHS.CUSTOM_NAME);
+    const result = await storage.get(DB_PATHS.CUSTOM_NAME);
+    return result ? result.value : null;
   },
 
   // Set instant audio
   async setInstantAudio(filename) {
-    return await firebaseREST.set(DB_PATHS.INSTANT_AUDIO, {
+    return await storage.set(DB_PATHS.INSTANT_AUDIO, {
       filename,
       timestamp: Date.now()
     });
@@ -253,24 +208,16 @@ const FirebaseHelper = {
 
   // Get instant audio
   async getInstantAudio() {
-    return await firebaseREST.get(DB_PATHS.INSTANT_AUDIO);
+    const result = await storage.get(DB_PATHS.INSTANT_AUDIO);
+    return result ? result.value : null;
   }
 };
 
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    firebaseConfig,
-    DB_PATHS,
-    FirebaseREST,
-    FirebaseHelper,
-    initializeFirebase
-  };
-}
-
-// Make available globally
+// Export
 window.firebaseConfig = firebaseConfig;
 window.DB_PATHS = DB_PATHS;
-window.FirebaseREST = FirebaseREST;
+window.FirebaseStorage = FirebaseStorage;
 window.FirebaseHelper = FirebaseHelper;
-window.firebaseREST = firebaseREST;
+
+console.log('✅ Firebase Storage initialized');
+console.log('🔗 Database URL:', firebaseConfig.databaseURL);

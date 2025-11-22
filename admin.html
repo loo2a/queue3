@@ -1,445 +1,535 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Edit2, Trash2, Save, X, Volume2, FileAudio, Video, Mic, Users, Monitor, Printer } from 'lucide-react';
-
-const ClinicQueueSystem = () => {
-  const [currentPage, setCurrentPage] = useState('admin');
-  const [settings, setSetting] = useState({
-    centerName: 'مركز الرعاية الطبية',
-    speechRate: 1.0,
-    audioPath: 'https://raw.githubusercontent.com/YOUR_USERNAME/clinic-queue/main/audio/',
-    mediaPath: 'https://raw.githubusercontent.com/YOUR_USERNAME/clinic-queue/main/media/',
-    newsText: 'مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل'
-  });
-  
-  const [clinics, setClinics] = useState([
-    { id: 1, name: 'طب الأسرة', number: 1, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
-    { id: 2, name: 'الأسنان', number: 2, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
-    { id: 3, name: 'الجلدية', number: 3, password: '1234', currentTicket: 0, isActive: true, lastCall: null }
-  ]);
-  
-  const [editingClinic, setEditingClinic] = useState(null);
-  const [newClinic, setNewClinic] = useState({ name: '', number: '', password: '' });
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [customCall, setCustomCall] = useState({ clinicId: '', ticketNumber: '', name: '' });
-  const [recording, setRecording] = useState(false);
-  const [selectedInstantAudio, setSelectedInstantAudio] = useState('');
-
-  // Initialize Firebase (simulated)
-  useEffect(() => {
-    const initFirebase = async () => {
-      try {
-        await window.storage.set('clinic-settings', JSON.stringify(settings));
-        await window.storage.set('clinic-list', JSON.stringify(clinics));
-      } catch (error) {
-        console.log('Storage initialization');
-      }
-    };
-    initFirebase();
-  }, []);
-
-  // Save settings to storage
-  const saveSettings = async () => {
-    try {
-      await window.storage.set('clinic-settings', JSON.stringify(settings));
-      alert('تم حفظ الإعدادات بنجاح');
-    } catch (error) {
-      alert('حدث خطأ في حفظ الإعدادات');
-    }
-  };
-
-  // Add new clinic
-  const addClinic = async () => {
-    if (!newClinic.name || !newClinic.number || !newClinic.password) {
-      alert('يرجى ملء جميع الحقول');
-      return;
-    }
-    
-    const clinic = {
-      id: Date.now(),
-      ...newClinic,
-      number: parseInt(newClinic.number),
-      currentTicket: 0,
-      isActive: true,
-      lastCall: null
-    };
-    
-    const updated = [...clinics, clinic];
-    setClinics(updated);
-    await window.storage.set('clinic-list', JSON.stringify(updated));
-    setNewClinic({ name: '', number: '', password: '' });
-    setShowAddForm(false);
-  };
-
-  // Update clinic
-  const updateClinic = async (id) => {
-    const updated = clinics.map(c => c.id === id ? editingClinic : c);
-    setClinics(updated);
-    await window.storage.set('clinic-list', JSON.stringify(updated));
-    setEditingClinic(null);
-  };
-
-  // Delete clinic
-  const deleteClinic = async (id) => {
-    if (confirm('هل أنت متأكد من حذف هذه العيادة؟')) {
-      const updated = clinics.filter(c => c.id !== id);
-      setClinics(updated);
-      await window.storage.set('clinic-list', JSON.stringify(updated));
-    }
-  };
-
-  // Call ticket number
-  const callTicket = async () => {
-    if (!customCall.clinicId || !customCall.ticketNumber) {
-      alert('يرجى اختيار العيادة ورقم العميل');
-      return;
-    }
-    
-    const callData = {
-      clinicId: customCall.clinicId,
-      ticketNumber: parseInt(customCall.ticketNumber),
-      clinicName: clinics.find(c => c.id === parseInt(customCall.clinicId))?.name,
-      timestamp: Date.now()
-    };
-    
-    await window.storage.set('current-call', JSON.stringify(callData), true);
-    alert('تم إرسال النداء');
-    setCustomCall({ clinicId: '', ticketNumber: '', name: '' });
-  };
-
-  // Display custom name
-  const displayName = async () => {
-    if (!customCall.name) {
-      alert('يرجى إدخال الاسم');
-      return;
-    }
-    
-    await window.storage.set('display-name', customCall.name, true);
-    alert('تم عرض الاسم');
-    setCustomCall({ ...customCall, name: '' });
-  };
-
-  // Play instant audio
-  const playInstantAudio = async () => {
-    if (!selectedInstantAudio) {
-      alert('يرجى اختيار ملف صوتي');
-      return;
-    }
-    
-    await window.storage.set('instant-audio', selectedInstantAudio, true);
-    alert('تم تشغيل الملف الصوتي');
-  };
-
-  // Start recording
-  const startRecording = () => {
-    setRecording(true);
-    alert('بدء التسجيل... (محاكاة)');
-    setTimeout(() => {
-      setRecording(false);
-      alert('تم حفظ التسجيل');
-    }, 3000);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6" dir="rtl">
-      {/* Navigation */}
-      <div className="mb-6 bg-white rounded-lg shadow-md p-4">
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setCurrentPage('admin')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Settings className="inline ml-2" size={18} />
-            الإدارة
-          </button>
-          <button onClick={() => setCurrentPage('display')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'display' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Monitor className="inline ml-2" size={18} />
-            شاشة العرض
-          </button>
-          <button onClick={() => setCurrentPage('control')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'control' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Users className="inline ml-2" size={18} />
-            التحكم
-          </button>
-          <button onClick={() => setCurrentPage('print')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'print' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Printer className="inline ml-2" size={18} />
-            طباعة التذاكر
-          </button>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - نظام نداء المرضى</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/custom-styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen" dir="rtl">
+    <!-- Navigation Bar -->
+    <nav class="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg mb-6">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-bold text-white">لوحة الإدارة</h1>
+                    <span class="bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">Admin</span>
+                </div>
+                <div class="flex gap-3">
+                    <a href="index.html" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition font-semibold">
+                        الصفحة الرئيسية
+                    </a>
+                    <a href="display.html" target="_blank" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold">
+                        شاشة العرض
+                    </a>
+                    <a href="control.html" target="_blank" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition font-semibold">
+                        التحكم
+                    </a>
+                </div>
+            </div>
         </div>
-      </div>
+    </nav>
 
-      {/* Admin Page */}
-      {currentPage === 'admin' && (
-        <div className="space-y-6">
-          {/* Center Settings */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4 text-blue-800">إعدادات المركز</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-2 font-semibold">اسم المركز</label>
-                <input
-                  type="text"
-                  value={settings.centerName}
-                  onChange={(e) => setSetting({...settings, centerName: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">سرعة النطق</label>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.1"
-                  value={settings.speechRate}
-                  onChange={(e) => setSetting({...settings, speechRate: parseFloat(e.target.value)})}
-                  className="w-full"
-                />
-                <span className="text-sm text-gray-600">{settings.speechRate}x</span>
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">مسار الصوتيات</label>
-                <input
-                  type="text"
-                  value={settings.audioPath}
-                  onChange={(e) => setSetting({...settings, audioPath: e.target.value})}
-                  className="w-full p-2 border rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">مسار الميديا</label>
-                <input
-                  type="text"
-                  value={settings.mediaPath}
-                  onChange={(e) => setSetting({...settings, mediaPath: e.target.value})}
-                  className="w-full p-2 border rounded-lg text-sm"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block mb-2 font-semibold">نص شريط الأخبار</label>
-                <textarea
-                  value={settings.newsText}
-                  onChange={(e) => setSetting({...settings, newsText: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                  rows="2"
-                />
-              </div>
+    <div class="container mx-auto px-6 pb-8">
+        <!-- Settings Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+            <div class="flex items-center gap-3 mb-6">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <h2 class="text-3xl font-bold text-gray-800">إعدادات المركز</h2>
             </div>
-            <button onClick={saveSettings} className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-              <Save className="inline ml-2" size={18} />
-              حفظ الإعدادات
-            </button>
-          </div>
-
-          {/* Clinics Management */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-blue-800">إدارة العيادات</h2>
-              <button onClick={() => setShowAddForm(!showAddForm)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                <Plus className="inline ml-2" size={18} />
-                إضافة عيادة
-              </button>
-            </div>
-
-            {showAddForm && (
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <input
-                    type="text"
-                    placeholder="اسم العيادة"
-                    value={newClinic.name}
-                    onChange={(e) => setNewClinic({...newClinic, name: e.target.value})}
-                    className="p-2 border rounded-lg"
-                  />
-                  <input
-                    type="number"
-                    placeholder="رقم العيادة"
-                    value={newClinic.number}
-                    onChange={(e) => setNewClinic({...newClinic, number: e.target.value})}
-                    className="p-2 border rounded-lg"
-                  />
-                  <input
-                    type="password"
-                    placeholder="كلمة المرور"
-                    value={newClinic.password}
-                    onChange={(e) => setNewClinic({...newClinic, password: e.target.value})}
-                    className="p-2 border rounded-lg"
-                  />
-                </div>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={addClinic} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                    حفظ
-                  </button>
-                  <button onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500">
-                    إلغاء
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              {clinics.map(clinic => (
-                <div key={clinic.id} className="p-4 border rounded-lg bg-gray-50">
-                  {editingClinic?.id === clinic.id ? (
-                    <div className="grid md:grid-cols-4 gap-2 items-center">
-                      <input
-                        type="text"
-                        value={editingClinic.name}
-                        onChange={(e) => setEditingClinic({...editingClinic, name: e.target.value})}
-                        className="p-2 border rounded"
-                      />
-                      <input
-                        type="number"
-                        value={editingClinic.number}
-                        onChange={(e) => setEditingClinic({...editingClinic, number: parseInt(e.target.value)})}
-                        className="p-2 border rounded"
-                      />
-                      <input
-                        type="password"
-                        value={editingClinic.password}
-                        onChange={(e) => setEditingClinic({...editingClinic, password: e.target.value})}
-                        className="p-2 border rounded"
-                      />
-                      <div className="flex gap-2">
-                        <button onClick={() => updateClinic(clinic.id)} className="bg-green-600 text-white p-2 rounded">
-                          <Save size={16} />
-                        </button>
-                        <button onClick={() => setEditingClinic(null)} className="bg-gray-400 text-white p-2 rounded">
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-bold text-lg">{clinic.name}</h3>
-                        <p className="text-sm text-gray-600">رقم العيادة: {clinic.number} | الرقم الحالي: {clinic.currentTicket}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setEditingClinic(clinic)} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                          <Edit2 size={16} />
-                        </button>
-                        <button onClick={() => deleteClinic(clinic.id)} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4 text-blue-800">إجراءات سريعة</h2>
             
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Call Ticket */}
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-bold mb-3 flex items-center">
-                  <Volume2 className="ml-2" />
-                  نداء عميل
-                </h3>
-                <select
-                  value={customCall.clinicId}
-                  onChange={(e) => setCustomCall({...customCall, clinicId: e.target.value})}
-                  className="w-full p-2 border rounded mb-2"
-                >
-                  <option value="">اختر العيادة</option>
-                  {clinics.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  placeholder="رقم العميل"
-                  value={customCall.ticketNumber}
-                  onChange={(e) => setCustomCall({...customCall, ticketNumber: e.target.value})}
-                  className="w-full p-2 border rounded mb-2"
-                />
-                <button onClick={callTicket} className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                  نداء
-                </button>
-              </div>
-
-              {/* Display Name */}
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-bold mb-3">عرض اسم عميل</h3>
-                <input
-                  type="text"
-                  placeholder="اسم العميل"
-                  value={customCall.name}
-                  onChange={(e) => setCustomCall({...customCall, name: e.target.value})}
-                  className="w-full p-2 border rounded mb-2"
-                />
-                <button onClick={displayName} className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
-                  عرض
-                </button>
-              </div>
-
-              {/* Record Audio */}
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <h3 className="font-bold mb-3 flex items-center">
-                  <Mic className="ml-2" />
-                  تسجيل صوتي
-                </h3>
-                <button 
-                  onClick={startRecording}
-                  className={`w-full p-2 rounded ${recording ? 'bg-red-600' : 'bg-purple-600'} text-white hover:opacity-90`}
-                >
-                  {recording ? 'جاري التسجيل...' : 'بدء التسجيل'}
-                </button>
-              </div>
-
-              {/* Instant Audio */}
-              <div className="p-4 bg-yellow-50 rounded-lg">
-                <h3 className="font-bold mb-3 flex items-center">
-                  <FileAudio className="ml-2" />
-                  ملف صوتي جاهز
-                </h3>
-                <select
-                  value={selectedInstantAudio}
-                  onChange={(e) => setSelectedInstantAudio(e.target.value)}
-                  className="w-full p-2 border rounded mb-2"
-                >
-                  <option value="">اختر ملف</option>
-                  <option value="announcement1.mp3">إعلان 1</option>
-                  <option value="announcement2.mp3">إعلان 2</option>
-                  <option value="emergency.mp3">طوارئ</option>
-                </select>
-                <button onClick={playInstantAudio} className="w-full bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">
-                  تشغيل
-                </button>
-              </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block mb-2 font-semibold text-gray-700">اسم المركز</label>
+                    <input type="text" id="centerName" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition" placeholder="مركز الرعاية الطبية">
+                </div>
+                
+                <div>
+                    <label class="block mb-2 font-semibold text-gray-700">سرعة النطق</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1" class="flex-1">
+                        <span id="speechRateValue" class="text-blue-600 font-bold text-lg w-16">1.0x</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block mb-2 font-semibold text-gray-700">مسار الصوتيات</label>
+                    <input type="text" id="audioPath" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition text-sm" placeholder="./audio/">
+                </div>
+                
+                <div>
+                    <label class="block mb-2 font-semibold text-gray-700">مسار الميديا</label>
+                    <input type="text" id="mediaPath" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition text-sm" placeholder="./media/">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block mb-2 font-semibold text-gray-700">نص شريط الأخبار</label>
+                    <textarea id="newsText" rows="2" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition" placeholder="مرحباً بكم في مركزنا الطبي"></textarea>
+                </div>
             </div>
-          </div>
+            
+            <button onclick="saveSettings()" class="mt-6 bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition font-bold text-lg shadow-lg">
+                💾 حفظ الإعدادات
+            </button>
         </div>
-      )}
 
-      {/* Display Page Placeholder */}
-      {currentPage === 'display' && (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <Monitor className="mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold mb-2">شاشة العرض</h2>
-          <p className="text-gray-600">سيتم عرض صفحة العرض في ملف منفصل</p>
-        </div>
-      )}
+        <!-- Clinics Management Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <h2 class="text-3xl font-bold text-gray-800">إدارة العيادات</h2>
+                </div>
+                <button onclick="showAddClinicForm()" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition font-bold shadow-lg">
+                    ➕ إضافة عيادة
+                </button>
+            </div>
 
-      {/* Control Page Placeholder */}
-      {currentPage === 'control' && (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <Users className="mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold mb-2">صفحة التحكم</h2>
-          <p className="text-gray-600">سيتم عرض صفحة التحكم في ملف منفصل</p>
-        </div>
-      )}
+            <!-- Add Clinic Form -->
+            <div id="addClinicForm" class="hidden mb-6 p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <h3 class="text-xl font-bold mb-4 text-blue-800">إضافة عيادة جديدة</h3>
+                <div class="grid md:grid-cols-4 gap-4">
+                    <input type="text" id="newClinicName" placeholder="اسم العيادة" class="p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                    <input type="number" id="newClinicNumber" placeholder="رقم العيادة" class="p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                    <input type="password" id="newClinicPassword" placeholder="كلمة المرور" class="p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                    <div class="flex gap-2">
+                        <button onclick="addClinic()" class="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition font-bold">
+                            ✓ حفظ
+                        </button>
+                        <button onclick="hideAddClinicForm()" class="bg-gray-400 text-white px-4 py-3 rounded-lg hover:bg-gray-500 transition font-bold">
+                            ✗
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-      {/* Print Page Placeholder */}
-      {currentPage === 'print' && (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <Printer className="mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold mb-2">طباعة التذاكر</h2>
-          <p className="text-gray-600">سيتم عرض صفحة الطباعة في ملف منفصل</p>
+            <!-- Clinics List -->
+            <div id="clinicsList" class="space-y-4">
+                <!-- Clinics will be inserted here -->
+            </div>
         </div>
-      )}
+
+        <!-- Quick Actions Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <h2 class="text-3xl font-bold text-gray-800">إجراءات سريعة</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Call Ticket -->
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                    <h3 class="font-bold mb-4 text-xl">🔊 نداء عميل</h3>
+                    <select id="callClinicSelect" class="w-full p-2 rounded-lg mb-2 text-gray-800">
+                        <option value="">اختر العيادة</option>
+                    </select>
+                    <input type="number" id="callTicketNumber" placeholder="رقم العميل" class="w-full p-2 rounded-lg mb-2 text-gray-800">
+                    <button onclick="callTicket()" class="w-full bg-white text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition font-bold">
+                        نداء
+                    </button>
+                </div>
+
+                <!-- Display Name -->
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                    <h3 class="font-bold mb-4 text-xl">👤 عرض اسم</h3>
+                    <input type="text" id="displayNameInput" placeholder="اسم العميل" class="w-full p-2 rounded-lg mb-2 text-gray-800">
+                    <button onclick="displayName()" class="w-full bg-white text-green-600 p-2 rounded-lg hover:bg-green-50 transition font-bold mt-8">
+                        عرض
+                    </button>
+                </div>
+
+                <!-- Record Audio -->
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                    <h3 class="font-bold mb-4 text-xl">🎤 تسجيل صوتي</h3>
+                    <button onclick="startRecording()" id="recordBtn" class="w-full bg-white text-purple-600 p-2 rounded-lg hover:bg-purple-50 transition font-bold">
+                        بدء التسجيل
+                    </button>
+                    <div id="recordingStatus" class="mt-2 text-center text-sm hidden">
+                        🔴 جاري التسجيل...
+                    </div>
+                </div>
+
+                <!-- Instant Audio -->
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+                    <h3 class="font-bold mb-4 text-xl">📢 ملف جاهز</h3>
+                    <select id="instantAudioSelect" class="w-full p-2 rounded-lg mb-2 text-gray-800">
+                        <option value="">اختر ملف</option>
+                        <option value="announcement1.mp3">إعلان 1</option>
+                        <option value="announcement2.mp3">إعلان 2</option>
+                        <option value="emergency.mp3">طوارئ</option>
+                        <option value="welcome.mp3">ترحيب</option>
+                        <option value="closing.mp3">إغلاق</option>
+                        <option value="prayer.mp3">صلاة</option>
+                    </select>
+                    <button onclick="playInstantAudio()" class="w-full bg-white text-orange-600 p-2 rounded-lg hover:bg-orange-50 transition font-bold">
+                        تشغيل
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  );
-};
 
-export default ClinicQueueSystem;
+    <script src="js/audio-handler.js"></script>
+    <script src="js/queue-manager.js"></script>
+    <script>
+        // Initialize
+        let settings = {
+            centerName: 'مركز الرعاية الطبية',
+            speechRate: 1.0,
+            audioPath: './audio/',
+            mediaPath: './media/',
+            newsText: 'مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل'
+        };
+
+        let clinics = [];
+        let isRecording = false;
+
+        // Load data on page load
+        window.addEventListener('load', async () => {
+            await loadSettings();
+            await loadClinics();
+            renderClinics();
+            populateClinicSelects();
+        });
+
+        // Load settings from storage
+        async function loadSettings() {
+            try {
+                const result = await window.storage.get('clinic-settings');
+                if (result && result.value) {
+                    settings = JSON.parse(result.value);
+                    
+                    // Update UI
+                    document.getElementById('centerName').value = settings.centerName;
+                    document.getElementById('speechRate').value = settings.speechRate;
+                    document.getElementById('speechRateValue').textContent = settings.speechRate + 'x';
+                    document.getElementById('audioPath').value = settings.audioPath;
+                    document.getElementById('mediaPath').value = settings.mediaPath;
+                    document.getElementById('newsText').value = settings.newsText;
+                }
+            } catch (error) {
+                console.log('No saved settings found, using defaults');
+            }
+        }
+
+        // Save settings to storage
+        async function saveSettings() {
+            settings = {
+                centerName: document.getElementById('centerName').value,
+                speechRate: parseFloat(document.getElementById('speechRate').value),
+                audioPath: document.getElementById('audioPath').value,
+                mediaPath: document.getElementById('mediaPath').value,
+                newsText: document.getElementById('newsText').value
+            };
+
+            try {
+                await window.storage.set('clinic-settings', JSON.stringify(settings));
+                
+                // Show success message
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ تم الحفظ بنجاح!';
+                btn.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-green-600');
+                }, 2000);
+            } catch (error) {
+                alert('حدث خطأ في حفظ الإعدادات');
+                console.error(error);
+            }
+        }
+
+        // Update speech rate display
+        document.getElementById('speechRate').addEventListener('input', (e) => {
+            document.getElementById('speechRateValue').textContent = e.target.value + 'x';
+        });
+
+        // Load clinics from storage
+        async function loadClinics() {
+            try {
+                const result = await window.storage.get('clinic-list');
+                if (result && result.value) {
+                    clinics = JSON.parse(result.value);
+                } else {
+                    // Default clinics if none exist
+                    clinics = [
+                        { id: Date.now() + 1, name: 'طب الأسرة', number: 1, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
+                        { id: Date.now() + 2, name: 'الأسنان', number: 2, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
+                        { id: Date.now() + 3, name: 'الجلدية', number: 3, password: '1234', currentTicket: 0, isActive: true, lastCall: null }
+                    ];
+                    await saveClinics();
+                }
+            } catch (error) {
+                console.log('No saved clinics found, using defaults');
+            }
+        }
+
+        // Save clinics to storage
+        async function saveClinics() {
+            try {
+                await window.storage.set('clinic-list', JSON.stringify(clinics));
+            } catch (error) {
+                console.error('Error saving clinics:', error);
+            }
+        }
+
+        // Render clinics list
+        function renderClinics() {
+            const container = document.getElementById('clinicsList');
+            container.innerHTML = '';
+
+            if (clinics.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">لا توجد عيادات. اضغط "إضافة عيادة" لإضافة عيادة جديدة.</p>';
+                return;
+            }
+
+            clinics.forEach(clinic => {
+                const card = document.createElement('div');
+                card.className = 'border-2 border-gray-200 rounded-lg p-6 hover:border-blue-400 transition bg-gradient-to-r from-white to-gray-50';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">${clinic.name}</h3>
+                            <div class="flex gap-6 text-sm text-gray-600">
+                                <span><strong>رقم العيادة:</strong> ${clinic.number}</span>
+                                <span><strong>الرقم الحالي:</strong> <span class="text-blue-600 font-bold text-lg">${clinic.currentTicket}</span></span>
+                                <span class="px-3 py-1 rounded-full ${clinic.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                    ${clinic.isActive ? '🟢 نشط' : '🔴 متوقف'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editClinic(${clinic.id})" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition" title="تعديل">
+                                ✏️
+                            </button>
+                            <button onclick="toggleClinicStatus(${clinic.id})" class="bg-yellow-600 text-white p-3 rounded-lg hover:bg-yellow-700 transition" title="${clinic.isActive ? 'إيقاف' : 'تفعيل'}">
+                                ${clinic.isActive ? '⏸️' : '▶️'}
+                            </button>
+                            <button onclick="deleteClinic(${clinic.id})" class="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 transition" title="حذف">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Show add clinic form
+        function showAddClinicForm() {
+            document.getElementById('addClinicForm').classList.remove('hidden');
+            document.getElementById('newClinicName').focus();
+        }
+
+        // Hide add clinic form
+        function hideAddClinicForm() {
+            document.getElementById('addClinicForm').classList.add('hidden');
+            document.getElementById('newClinicName').value = '';
+            document.getElementById('newClinicNumber').value = '';
+            document.getElementById('newClinicPassword').value = '';
+        }
+
+        // Add clinic
+        async function addClinic() {
+            const name = document.getElementById('newClinicName').value.trim();
+            const number = parseInt(document.getElementById('newClinicNumber').value);
+            const password = document.getElementById('newClinicPassword').value;
+
+            if (!name || !number || !password) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const newClinic = {
+                id: Date.now(),
+                name,
+                number,
+                password,
+                currentTicket: 0,
+                isActive: true,
+                lastCall: null
+            };
+
+            clinics.push(newClinic);
+            await saveClinics();
+            renderClinics();
+            populateClinicSelects();
+            hideAddClinicForm();
+        }
+
+        // Edit clinic (simplified - show prompt)
+        async function editClinic(id) {
+            const clinic = clinics.find(c => c.id === id);
+            if (!clinic) return;
+
+            const newName = prompt('اسم العيادة الجديد:', clinic.name);
+            if (!newName) return;
+
+            const newNumber = prompt('رقم العيادة الجديد:', clinic.number);
+            if (!newNumber) return;
+
+            const newPassword = prompt('كلمة المرور الجديدة:', clinic.password);
+            if (!newPassword) return;
+
+            clinic.name = newName;
+            clinic.number = parseInt(newNumber);
+            clinic.password = newPassword;
+
+            await saveClinics();
+            renderClinics();
+            populateClinicSelects();
+        }
+
+        // Toggle clinic status
+        async function toggleClinicStatus(id) {
+            const clinic = clinics.find(c => c.id === id);
+            if (!clinic) return;
+
+            clinic.isActive = !clinic.isActive;
+            await saveClinics();
+            renderClinics();
+        }
+
+        // Delete clinic
+        async function deleteClinic(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه العيادة؟')) return;
+
+            clinics = clinics.filter(c => c.id !== id);
+            await saveClinics();
+            renderClinics();
+            populateClinicSelects();
+        }
+
+        // Populate clinic selects
+        function populateClinicSelects() {
+            const select = document.getElementById('callClinicSelect');
+            select.innerHTML = '<option value="">اختر العيادة</option>';
+            
+            clinics.forEach(clinic => {
+                const option = document.createElement('option');
+                option.value = clinic.id;
+                option.textContent = clinic.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Call ticket
+        async function callTicket() {
+            const clinicId = parseInt(document.getElementById('callClinicSelect').value);
+            const ticketNumber = parseInt(document.getElementById('callTicketNumber').value);
+
+            if (!clinicId || !ticketNumber) {
+                alert('يرجى اختيار العيادة ورقم العميل');
+                return;
+            }
+
+            const clinic = clinics.find(c => c.id === clinicId);
+            if (!clinic) return;
+
+            const callData = {
+                clinicId: clinic.id,
+                ticketNumber: ticketNumber,
+                clinicName: clinic.name,
+                clinicNumber: clinic.number,
+                timestamp: Date.now()
+            };
+
+            try {
+                await window.storage.set('current-call', JSON.stringify(callData), true);
+                
+                // Update clinic current ticket
+                clinic.currentTicket = ticketNumber;
+                clinic.lastCall = new Date().toISOString();
+                await saveClinics();
+                renderClinics();
+
+                // Show success
+                alert('تم إرسال النداء بنجاح');
+                document.getElementById('callTicketNumber').value = '';
+            } catch (error) {
+                alert('حدث خطأ في إرسال النداء');
+                console.error(error);
+            }
+        }
+
+        // Display name
+        async function displayName() {
+            const name = document.getElementById('displayNameInput').value.trim();
+            
+            if (!name) {
+                alert('يرجى إدخال الاسم');
+                return;
+            }
+
+            try {
+                await window.storage.set('display-name', name, true);
+                alert('تم عرض الاسم على الشاشة');
+                document.getElementById('displayNameInput').value = '';
+            } catch (error) {
+                alert('حدث خطأ في عرض الاسم');
+                console.error(error);
+            }
+        }
+
+        // Start recording
+        function startRecording() {
+            const btn = document.getElementById('recordBtn');
+            const status = document.getElementById('recordingStatus');
+            
+            if (!isRecording) {
+                isRecording = true;
+                btn.textContent = 'إيقاف التسجيل';
+                btn.classList.add('bg-red-500');
+                status.classList.remove('hidden');
+                
+                // Simulate recording (في الواقع ستحتاج MediaRecorder API)
+                setTimeout(() => {
+                    stopRecording();
+                }, 5000);
+            } else {
+                stopRecording();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            const btn = document.getElementById('recordBtn');
+            const status = document.getElementById('recordingStatus');
+            
+            btn.textContent = 'بدء التسجيل';
+            btn.classList.remove('bg-red-500');
+            status.classList.add('hidden');
+            
+            alert('تم حفظ التسجيل (محاكاة)');
+        }
+
+        // Play instant audio
+        async function playInstantAudio() {
+            const filename = document.getElementById('instantAudioSelect').value;
+            
+            if (!filename) {
+                alert('يرجى اختيار ملف صوتي');
+                return;
+            }
+
+            try {
+                await window.storage.set('instant-audio', filename, true);
+                alert('تم تشغيل الملف الصوتي');
+            } catch (error) {
+                alert('حدث خطأ في تشغيل الملف');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,445 +1,250 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Edit2, Trash2, Save, X, Volume2, FileAudio, Video, Mic, Users, Monitor, Printer } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة الإدارة</title>
 
-const ClinicQueueSystem = () => {
-  const [currentPage, setCurrentPage] = useState('admin');
-  const [settings, setSetting] = useState({
-    centerName: 'مركز الرعاية الطبية',
-    speechRate: 1.0,
-    audioPath: 'https://raw.githubusercontent.com/YOUR_USERNAME/clinic-queue/main/audio/',
-    mediaPath: 'https://raw.githubusercontent.com/YOUR_USERNAME/clinic-queue/main/media/',
-    newsText: 'مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل'
-  });
-  
-  const [clinics, setClinics] = useState([
-    { id: 1, name: 'طب الأسرة', number: 1, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
-    { id: 2, name: 'الأسنان', number: 2, password: '1234', currentTicket: 0, isActive: true, lastCall: null },
-    { id: 3, name: 'الجلدية', number: 3, password: '1234', currentTicket: 0, isActive: true, lastCall: null }
-  ]);
-  
-  const [editingClinic, setEditingClinic] = useState(null);
-  const [newClinic, setNewClinic] = useState({ name: '', number: '', password: '' });
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [customCall, setCustomCall] = useState({ clinicId: '', ticketNumber: '', name: '' });
-  const [recording, setRecording] = useState(false);
-  const [selectedInstantAudio, setSelectedInstantAudio] = useState('');
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  // Initialize Firebase (simulated)
-  useEffect(() => {
-    const initFirebase = async () => {
-      try {
-        await window.storage.set('clinic-settings', JSON.stringify(settings));
-        await window.storage.set('clinic-list', JSON.stringify(clinics));
-      } catch (error) {
-        console.log('Storage initialization');
+  <!-- React 18 + ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      background: #f6f9fc;
+      font-family: "Tajawal", sans-serif;
+    }
+  </style>
+</head>
+
+<body class="p-6">
+  <div id="app"></div>
+
+  <script type="text/babel">
+
+    /* ---------------------------
+       تخزين / تحميل البيانات
+    ----------------------------*/
+    const storage = {
+      get(key, fallback) {
+        try {
+          const value = localStorage.getItem(key);
+          return value ? JSON.parse(value) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      },
+      set(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
       }
     };
-    initFirebase();
-  }, []);
 
-  // Save settings to storage
-  const saveSettings = async () => {
-    try {
-      await window.storage.set('clinic-settings', JSON.stringify(settings));
-      alert('تم حفظ الإعدادات بنجاح');
-    } catch (error) {
-      alert('حدث خطأ في حفظ الإعدادات');
-    }
-  };
+    /* ---------------------------
+        الكومبوننت الرئيسي
+    ----------------------------*/
+    function AdminPanel() {
+      const [clinics, setClinics] = React.useState(
+        storage.get("clinic-list", [])
+      );
 
-  // Add new clinic
-  const addClinic = async () => {
-    if (!newClinic.name || !newClinic.number || !newClinic.password) {
-      alert('يرجى ملء جميع الحقول');
-      return;
-    }
-    
-    const clinic = {
-      id: Date.now(),
-      ...newClinic,
-      number: parseInt(newClinic.number),
-      currentTicket: 0,
-      isActive: true,
-      lastCall: null
-    };
-    
-    const updated = [...clinics, clinic];
-    setClinics(updated);
-    await window.storage.set('clinic-list', JSON.stringify(updated));
-    setNewClinic({ name: '', number: '', password: '' });
-    setShowAddForm(false);
-  };
+      const [settings, setSettings] = React.useState(
+        storage.get("clinic-settings", {
+          centerName: "",
+          speechRate: 1,
+          audioPath: "",
+          mediaPath: "",
+          newsText: ""
+        })
+      );
 
-  // Update clinic
-  const updateClinic = async (id) => {
-    const updated = clinics.map(c => c.id === id ? editingClinic : c);
-    setClinics(updated);
-    await window.storage.set('clinic-list', JSON.stringify(updated));
-    setEditingClinic(null);
-  };
+      const [newClinic, setNewClinic] = React.useState({
+        name: "",
+        number: "",
+        password: "1234",
+      });
 
-  // Delete clinic
-  const deleteClinic = async (id) => {
-    if (confirm('هل أنت متأكد من حذف هذه العيادة؟')) {
-      const updated = clinics.filter(c => c.id !== id);
-      setClinics(updated);
-      await window.storage.set('clinic-list', JSON.stringify(updated));
-    }
-  };
+      /* حفظ الإعدادات */
+      function saveSettings() {
+        storage.set("clinic-settings", settings);
+        alert("✔ تم حفظ الإعدادات بنجاح");
+      }
 
-  // Call ticket number
-  const callTicket = async () => {
-    if (!customCall.clinicId || !customCall.ticketNumber) {
-      alert('يرجى اختيار العيادة ورقم العميل');
-      return;
-    }
-    
-    const callData = {
-      clinicId: customCall.clinicId,
-      ticketNumber: parseInt(customCall.ticketNumber),
-      clinicName: clinics.find(c => c.id === parseInt(customCall.clinicId))?.name,
-      timestamp: Date.now()
-    };
-    
-    await window.storage.set('current-call', JSON.stringify(callData), true);
-    alert('تم إرسال النداء');
-    setCustomCall({ clinicId: '', ticketNumber: '', name: '' });
-  };
+      /* إضافة عيادة جديدة */
+      function addClinic() {
+        if (!newClinic.name || !newClinic.number)
+          return alert("اكتب اسم العيادة ورقمها");
 
-  // Display custom name
-  const displayName = async () => {
-    if (!customCall.name) {
-      alert('يرجى إدخال الاسم');
-      return;
-    }
-    
-    await window.storage.set('display-name', customCall.name, true);
-    alert('تم عرض الاسم');
-    setCustomCall({ ...customCall, name: '' });
-  };
+        const updated = [
+          ...clinics,
+          {
+            id: Date.now(),
+            name: newClinic.name,
+            number: Number(newClinic.number),
+            password: newClinic.password,
+            currentTicket: 0,
+            isActive: true
+          }
+        ];
 
-  // Play instant audio
-  const playInstantAudio = async () => {
-    if (!selectedInstantAudio) {
-      alert('يرجى اختيار ملف صوتي');
-      return;
-    }
-    
-    await window.storage.set('instant-audio', selectedInstantAudio, true);
-    alert('تم تشغيل الملف الصوتي');
-  };
+        setClinics(updated);
+        storage.set("clinic-list", updated);
 
-  // Start recording
-  const startRecording = () => {
-    setRecording(true);
-    alert('بدء التسجيل... (محاكاة)');
-    setTimeout(() => {
-      setRecording(false);
-      alert('تم حفظ التسجيل');
-    }, 3000);
-  };
+        setNewClinic({ name: "", number: "", password: "1234" });
+      }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6" dir="rtl">
-      {/* Navigation */}
-      <div className="mb-6 bg-white rounded-lg shadow-md p-4">
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setCurrentPage('admin')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Settings className="inline ml-2" size={18} />
-            الإدارة
-          </button>
-          <button onClick={() => setCurrentPage('display')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'display' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Monitor className="inline ml-2" size={18} />
-            شاشة العرض
-          </button>
-          <button onClick={() => setCurrentPage('control')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'control' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Users className="inline ml-2" size={18} />
-            التحكم
-          </button>
-          <button onClick={() => setCurrentPage('print')} className={`px-4 py-2 rounded-lg transition ${currentPage === 'print' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
-            <Printer className="inline ml-2" size={18} />
-            طباعة التذاكر
-          </button>
-        </div>
-      </div>
+      /* حذف عيادة */
+      function deleteClinic(id) {
+        if (!confirm("هل تريد حذف هذه العيادة؟")) return;
+        const updated = clinics.filter(c => c.id !== id);
+        setClinics(updated);
+        storage.set("clinic-list", updated);
+      }
 
-      {/* Admin Page */}
-      {currentPage === 'admin' && (
-        <div className="space-y-6">
-          {/* Center Settings */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4 text-blue-800">إعدادات المركز</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+      return (
+        <div className="space-y-10 max-w-4xl mx-auto">
+
+          {/* عنوان الصفحة */}
+          <h1 className="text-4xl font-bold text-blue-700 text-center mb-6">
+            ⚙ لوحة الإدارة
+          </h1>
+
+
+          {/* ============================
+                  قسم الإعدادات العامة
+              ============================ */}
+          <section className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-2xl font-bold mb-4">الإعدادات العامة</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
               <div>
-                <label className="block mb-2 font-semibold">اسم المركز</label>
-                <input
-                  type="text"
+                <label className="font-bold">اسم المركز</label>
+                <input type="text" className="w-full mt-1 p-2 rounded border"
                   value={settings.centerName}
-                  onChange={(e) => setSetting({...settings, centerName: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
+                  onChange={e => setSettings({...settings, centerName: e.target.value})}
                 />
               </div>
-              <div>
-                <label className="block mb-2 font-semibold">سرعة النطق</label>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.1"
-                  value={settings.speechRate}
-                  onChange={(e) => setSetting({...settings, speechRate: parseFloat(e.target.value)})}
-                  className="w-full"
-                />
-                <span className="text-sm text-gray-600">{settings.speechRate}x</span>
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">مسار الصوتيات</label>
-                <input
-                  type="text"
-                  value={settings.audioPath}
-                  onChange={(e) => setSetting({...settings, audioPath: e.target.value})}
-                  className="w-full p-2 border rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">مسار الميديا</label>
-                <input
-                  type="text"
-                  value={settings.mediaPath}
-                  onChange={(e) => setSetting({...settings, mediaPath: e.target.value})}
-                  className="w-full p-2 border rounded-lg text-sm"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block mb-2 font-semibold">نص شريط الأخبار</label>
-                <textarea
-                  value={settings.newsText}
-                  onChange={(e) => setSetting({...settings, newsText: e.target.value})}
-                  className="w-full p-2 border rounded-lg"
-                  rows="2"
-                />
-              </div>
-            </div>
-            <button onClick={saveSettings} className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-              <Save className="inline ml-2" size={18} />
-              حفظ الإعدادات
-            </button>
-          </div>
 
-          {/* Clinics Management */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-blue-800">إدارة العيادات</h2>
-              <button onClick={() => setShowAddForm(!showAddForm)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                <Plus className="inline ml-2" size={18} />
-                إضافة عيادة
+              <div>
+                <label className="font-bold">سرعة الصوت</label>
+                <input type="number" step="0.1" min="0.5" max="2"
+                  className="w-full mt-1 p-2 rounded border"
+                  value={settings.speechRate}
+                  onChange={e => setSettings({...settings, speechRate: e.target.value})}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="font-bold">مسار ملفات الصوت</label>
+                <input type="text" className="w-full mt-1 p-2 rounded border"
+                  value={settings.audioPath}
+                  onChange={e => setSettings({...settings, audioPath: e.target.value})}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="font-bold">مسار الوسائط</label>
+                <input type="text" className="w-full mt-1 p-2 rounded border"
+                  value={settings.mediaPath}
+                  onChange={e => setSettings({...settings, mediaPath: e.target.value})}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="font-bold">شريط الأخبار</label>
+                <textarea
+                  className="w-full mt-1 p-2 rounded border"
+                  rows="3"
+                  value={settings.newsText}
+                  onChange={e => setSettings({...settings, newsText: e.target.value})}
+                ></textarea>
+              </div>
+
+            </div>
+
+            <button
+              onClick={saveSettings}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              💾 حفظ الإعدادات
+            </button>
+          </section>
+
+
+          {/* ============================
+              إدارة العيادات
+          ============================ */}
+          <section className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-2xl font-bold mb-4">إدارة العيادات</h2>
+
+            {/* إضافة عيادة */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+              <input type="text"
+                placeholder="اسم العيادة"
+                className="p-2 border rounded"
+                value={newClinic.name}
+                onChange={(e) => setNewClinic({...newClinic, name: e.target.value})}
+              />
+
+              <input type="number"
+                placeholder="رقم العيادة"
+                className="p-2 border rounded"
+                value={newClinic.number}
+                onChange={(e) => setNewClinic({...newClinic, number: e.target.value})}
+              />
+
+              <button
+                onClick={addClinic}
+                className="p-2 bg-green-600 text-white rounded hover:bg-green-700">
+                ➕ إضافة
               </button>
             </div>
 
-            {showAddForm && (
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <input
-                    type="text"
-                    placeholder="اسم العيادة"
-                    value={newClinic.name}
-                    onChange={(e) => setNewClinic({...newClinic, name: e.target.value})}
-                    className="p-2 border rounded-lg"
-                  />
-                  <input
-                    type="number"
-                    placeholder="رقم العيادة"
-                    value={newClinic.number}
-                    onChange={(e) => setNewClinic({...newClinic, number: e.target.value})}
-                    className="p-2 border rounded-lg"
-                  />
-                  <input
-                    type="password"
-                    placeholder="كلمة المرور"
-                    value={newClinic.password}
-                    onChange={(e) => setNewClinic({...newClinic, password: e.target.value})}
-                    className="p-2 border rounded-lg"
-                  />
-                </div>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={addClinic} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                    حفظ
-                  </button>
-                  <button onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500">
-                    إلغاء
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* قائمة العيادات */}
+            <table className="w-full border text-center">
+              <thead className="bg-blue-100">
+                <tr>
+                  <th className="p-2 border">الاسم</th>
+                  <th className="p-2 border">الرقم</th>
+                  <th className="p-2 border">كلمة السر</th>
+                  <th className="p-2 border">حذف</th>
+                </tr>
+              </thead>
 
-            <div className="space-y-3">
-              {clinics.map(clinic => (
-                <div key={clinic.id} className="p-4 border rounded-lg bg-gray-50">
-                  {editingClinic?.id === clinic.id ? (
-                    <div className="grid md:grid-cols-4 gap-2 items-center">
-                      <input
-                        type="text"
-                        value={editingClinic.name}
-                        onChange={(e) => setEditingClinic({...editingClinic, name: e.target.value})}
-                        className="p-2 border rounded"
-                      />
-                      <input
-                        type="number"
-                        value={editingClinic.number}
-                        onChange={(e) => setEditingClinic({...editingClinic, number: parseInt(e.target.value)})}
-                        className="p-2 border rounded"
-                      />
-                      <input
-                        type="password"
-                        value={editingClinic.password}
-                        onChange={(e) => setEditingClinic({...editingClinic, password: e.target.value})}
-                        className="p-2 border rounded"
-                      />
-                      <div className="flex gap-2">
-                        <button onClick={() => updateClinic(clinic.id)} className="bg-green-600 text-white p-2 rounded">
-                          <Save size={16} />
-                        </button>
-                        <button onClick={() => setEditingClinic(null)} className="bg-gray-400 text-white p-2 rounded">
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-bold text-lg">{clinic.name}</h3>
-                        <p className="text-sm text-gray-600">رقم العيادة: {clinic.number} | الرقم الحالي: {clinic.currentTicket}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setEditingClinic(clinic)} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                          <Edit2 size={16} />
-                        </button>
-                        <button onClick={() => deleteClinic(clinic.id)} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+              <tbody>
+                {clinics.map(clinic => (
+                  <tr key={clinic.id} className="border">
+                    <td className="p-2 border">{clinic.name}</td>
+                    <td className="p-2 border">{clinic.number}</td>
+                    <td className="p-2 border">{clinic.password}</td>
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold mb-4 text-blue-800">إجراءات سريعة</h2>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Call Ticket */}
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-bold mb-3 flex items-center">
-                  <Volume2 className="ml-2" />
-                  نداء عميل
-                </h3>
-                <select
-                  value={customCall.clinicId}
-                  onChange={(e) => setCustomCall({...customCall, clinicId: e.target.value})}
-                  className="w-full p-2 border rounded mb-2"
-                >
-                  <option value="">اختر العيادة</option>
-                  {clinics.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  placeholder="رقم العميل"
-                  value={customCall.ticketNumber}
-                  onChange={(e) => setCustomCall({...customCall, ticketNumber: e.target.value})}
-                  className="w-full p-2 border rounded mb-2"
-                />
-                <button onClick={callTicket} className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                  نداء
-                </button>
-              </div>
+                    <td className="p-2 border">
+                      <button
+                        className="text-red-600 font-bold"
+                        onClick={() => deleteClinic(clinic.id)}
+                      >
+                        حذف
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
 
-              {/* Display Name */}
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-bold mb-3">عرض اسم عميل</h3>
-                <input
-                  type="text"
-                  placeholder="اسم العميل"
-                  value={customCall.name}
-                  onChange={(e) => setCustomCall({...customCall, name: e.target.value})}
-                  className="w-full p-2 border rounded mb-2"
-                />
-                <button onClick={displayName} className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
-                  عرض
-                </button>
-              </div>
-
-              {/* Record Audio */}
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <h3 className="font-bold mb-3 flex items-center">
-                  <Mic className="ml-2" />
-                  تسجيل صوتي
-                </h3>
-                <button 
-                  onClick={startRecording}
-                  className={`w-full p-2 rounded ${recording ? 'bg-red-600' : 'bg-purple-600'} text-white hover:opacity-90`}
-                >
-                  {recording ? 'جاري التسجيل...' : 'بدء التسجيل'}
-                </button>
-              </div>
-
-              {/* Instant Audio */}
-              <div className="p-4 bg-yellow-50 rounded-lg">
-                <h3 className="font-bold mb-3 flex items-center">
-                  <FileAudio className="ml-2" />
-                  ملف صوتي جاهز
-                </h3>
-                <select
-                  value={selectedInstantAudio}
-                  onChange={(e) => setSelectedInstantAudio(e.target.value)}
-                  className="w-full p-2 border rounded mb-2"
-                >
-                  <option value="">اختر ملف</option>
-                  <option value="announcement1.mp3">إعلان 1</option>
-                  <option value="announcement2.mp3">إعلان 2</option>
-                  <option value="emergency.mp3">طوارئ</option>
-                </select>
-                <button onClick={playInstantAudio} className="w-full bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">
-                  تشغيل
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
+      );
+    }
 
-      {/* Display Page Placeholder */}
-      {currentPage === 'display' && (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <Monitor className="mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold mb-2">شاشة العرض</h2>
-          <p className="text-gray-600">سيتم عرض صفحة العرض في ملف منفصل</p>
-        </div>
-      )}
-
-      {/* Control Page Placeholder */}
-      {currentPage === 'control' && (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <Users className="mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold mb-2">صفحة التحكم</h2>
-          <p className="text-gray-600">سيتم عرض صفحة التحكم في ملف منفصل</p>
-        </div>
-      )}
-
-      {/* Print Page Placeholder */}
-      {currentPage === 'print' && (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <Printer className="mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold mb-2">طباعة التذاكر</h2>
-          <p className="text-gray-600">سيتم عرض صفحة الطباعة في ملف منفصل</p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ClinicQueueSystem;
+    /* تشغيل التطبيق */
+    const root = ReactDOM.createRoot(document.getElementById("app"));
+    root.render(<AdminPanel />);
+  </script>
+</body>
+</html>

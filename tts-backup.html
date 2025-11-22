@@ -3,179 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار النطق الصحيح</title>
+    <title>طباعة التذاكر</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 210mm;
+                height: 297mm;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .ticket {
+                page-break-inside: avoid;
+            }
+        }
+        
+        .ticket {
+            width: 5cm;
+            height: 5cm;
+            border: 2px solid #000;
+            page-break-inside: avoid;
+        }
+        
+        #printArea {
+            width: 210mm;
+            min-height: 297mm;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-green-900 to-teal-900 min-h-screen text-white p-8" dir="rtl">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white text-gray-800 rounded-2xl shadow-2xl p-8 mb-6">
-            <h1 class="text-4xl font-bold mb-6 text-center text-green-800">🎤 اختبار النطق الصحيح للأرقام</h1>
-            
-            <div class="bg-green-50 p-6 rounded-lg mb-6">
-                <h2 class="text-2xl font-bold mb-4 text-green-800">✅ النطق الصحيح الآن:</h2>
-                <div class="space-y-2 text-lg">
-                    <p>• <strong>54</strong> → أربعة وخمسون ✓</p>
-                    <p>• <strong>123</strong> → ثلاثة وعشرون ومائة ✓</p>
-                    <p>• <strong>468</strong> → ثمانية وستون وأربعمائة ✓</p>
-                    <p>• <strong>305</strong> → خمسة وثلاثمائة ✓</p>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6" dir="rtl">
+    <div class="no-print">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-blue-800 mb-2">طباعة تذاكر المرضى</h1>
+                    <p class="text-gray-600">اختر العيادة ونطاق الأرقام للطباعة</p>
                 </div>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-4 mb-6">
-                <button onclick="testNumber(5)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">5</div>
-                    <div class="text-sm">خمسة</div>
-                </button>
-                <button onclick="testNumber(54)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">54</div>
-                    <div class="text-sm">أربعة وخمسون</div>
-                </button>
-                <button onclick="testNumber(123)" class="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">123</div>
-                    <div class="text-sm">ثلاثة وعشرون ومائة</div>
-                </button>
-                <button onclick="testNumber(305)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">305</div>
-                    <div class="text-sm">خمسة وثلاثمائة</div>
-                </button>
-                <button onclick="testNumber(468)" class="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">468</div>
-                    <div class="text-sm">ثمانية وستون وأربعمائة</div>
-                </button>
-                <button onclick="testNumber(999)" class="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition shadow-lg">
-                    <div class="text-4xl font-bold mb-2">999</div>
-                    <div class="text-sm">تسعة وتسعون وتسعمائة</div>
-                </button>
-            </div>
-
-            <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                <h3 class="font-bold mb-2">اختبار رقم مخصص:</h3>
-                <div class="flex gap-2">
-                    <input type="number" id="customNumber" placeholder="أدخل رقم (0-999)" class="flex-1 p-3 border-2 rounded-lg" min="0" max="999">
-                    <button onclick="testCustomNumber()" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 font-bold">
-                        اختبار
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-yellow-50 p-4 rounded-lg">
-                <h3 class="font-bold mb-2 text-yellow-800">📋 تسلسل الملفات:</h3>
-                <div id="fileSequence" class="text-sm text-gray-700 font-mono bg-white p-3 rounded">
-                    اختر رقماً لعرض تسلسل الملفات
-                </div>
+                <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+                    العودة
+                </a>
             </div>
         </div>
 
-        <div class="text-center">
-            <a href="index.html" class="text-blue-200 hover:text-white underline">← العودة للصفحة الرئيسية</a>
+        <!-- Clinic Selection -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-blue-800">اختيار العيادة</h2>
+            <div id="clinicButtons" class="grid md:grid-cols-3 gap-4">
+                <!-- Clinic buttons will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Print Settings -->
+        <div id="printSettings" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-blue-800">إعدادات الطباعة</h2>
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block mb-2 font-semibold">من رقم</label>
+                    <input type="number" id="startNumber" value="1" min="1" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block mb-2 font-semibold">إلى رقم</label>
+                    <input type="number" id="endNumber" value="20" min="1" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block mb-2 font-semibold">العملاء الحاليون قبلك</label>
+                <input type="number" id="waitingCount" value="0" min="0" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                <p class="text-sm text-gray-600 mt-1">عدد العملاء المنتظرين حالياً</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block mb-2 font-semibold">متوسط وقت الانتظار لكل عميل (دقائق)</label>
+                <input type="number" id="avgWaitTime" value="5" min="1" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="generateTickets()" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                    إنشاء التذاكر
+                </button>
+                <button onclick="printTickets()" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                    طباعة
+                </button>
+                <button onclick="clearTickets()" class="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">
+                    مسح
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview -->
+        <div id="previewSection" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-blue-800">معاينة التذاكر</h2>
+            <p class="text-gray-600 mb-4">سيتم طباعة <span id="ticketCount" class="font-bold text-blue-600">0</span> تذكرة</p>
+        </div>
+    </div>
+
+    <!-- Print Area (A4 Page) -->
+    <div id="printArea" class="bg-white mx-auto" style="width: 210mm;">
+        <div id="ticketsContainer" class="grid grid-cols-4 gap-0 p-4">
+            <!-- Tickets will be generated here -->
         </div>
     </div>
 
     <script src="js/firebase-config.js"></script>
-    <script src="js/audio-handler.js"></script>
     <script>
-        let audioHandler;
+        let selectedClinic = null;
+        let clinics = [];
 
-        async function init() {
-            // Wait for dependencies
-            await new Promise(resolve => {
-                const check = () => {
-                    if (window.AudioHandler) {
-                        resolve();
-                    } else {
-                        setTimeout(check, 100);
-                    }
-                };
-                check();
+        // Wait for Firebase
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.storage) {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForFirebase().then(resolve), 100);
+                }
+            });
+        }
+
+        // Load clinics
+        async function loadClinics() {
+            await waitForFirebase();
+            try {
+                const result = await window.storage.get('clinic-list');
+                if (result && result.value) {
+                    clinics = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
+                    renderClinicButtons();
+                    console.log('✅ Clinics loaded:', clinics.length);
+                }
+            } catch (error) {
+                console.error('Error loading clinics:', error);
+                alert('حدث خطأ في تحميل العيادات');
+            }
+        }
+
+        // Render clinic buttons
+        function renderClinicButtons() {
+            const container = document.getElementById('clinicButtons');
+            container.innerHTML = '';
+            
+            if (clinics.length === 0) {
+                container.innerHTML = '<p class="col-span-3 text-center text-gray-500">لا توجد عيادات متاحة</p>';
+                return;
+            }
+
+            clinics.forEach(clinic => {
+                const button = document.createElement('button');
+                button.className = 'bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-lg transform hover:scale-105';
+                button.innerHTML = `
+                    <div class="text-2xl font-bold mb-2">${clinic.name}</div>
+                    <div class="text-lg">عيادة رقم ${clinic.number}</div>
+                `;
+                button.onclick = () => selectClinic(clinic);
+                container.appendChild(button);
+            });
+        }
+
+        // Select clinic
+        function selectClinic(clinic) {
+            selectedClinic = clinic;
+            document.getElementById('printSettings').classList.remove('hidden');
+            
+            // Highlight selected
+            const buttons = document.querySelectorAll('#clinicButtons button');
+            buttons.forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-yellow-400');
+            });
+            event.target.closest('button').classList.add('ring-4', 'ring-yellow-400');
+            
+            console.log('✅ Selected clinic:', clinic.name);
+        }
+
+        // Calculate wait time
+        function calculateWaitTime(ticketNumber) {
+            const waitingBefore = parseInt(document.getElementById('waitingCount').value) || 0;
+            const avgTime = parseInt(document.getElementById('avgWaitTime').value) || 5;
+            const position = ticketNumber + waitingBefore;
+            const minutes = position * avgTime;
+            
+            if (minutes < 60) {
+                return `${minutes} دقيقة`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                return `${hours} ساعة${mins > 0 ? ` و ${mins} دقيقة` : ''}`;
+            }
+        }
+
+        // Generate tickets
+        function generateTickets() {
+            if (!selectedClinic) {
+                alert('يرجى اختيار العيادة أولاً');
+                return;
+            }
+
+            const start = parseInt(document.getElementById('startNumber').value);
+            const end = parseInt(document.getElementById('endNumber').value);
+            
+            if (isNaN(start) || isNaN(end)) {
+                alert('يرجى إدخال أرقام صحيحة');
+                return;
+            }
+
+            if (start > end) {
+                alert('رقم البداية يجب أن يكون أقل من رقم النهاية');
+                return;
+            }
+
+            if (end - start > 100) {
+                if (!confirm('سيتم طباعة أكثر من 100 تذكرة. هل تريد المتابعة؟')) {
+                    return;
+                }
+            }
+
+            const container = document.getElementById('ticketsContainer');
+            container.innerHTML = '';
+
+            const currentDate = new Date().toLocaleDateString('ar-EG', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
 
-            audioHandler = new AudioHandler();
-            console.log('✅ Audio Handler ready');
+            for (let i = start; i <= end; i++) {
+                const ticket = document.createElement('div');
+                ticket.className = 'ticket flex flex-col justify-between p-3 bg-white';
+                
+                const waitTime = calculateWaitTime(i);
+                const waitingBefore = parseInt(document.getElementById('waitingCount').value) || 0;
+                
+                ticket.innerHTML = `
+                    <div class="text-center border-b-2 border-dashed pb-2 mb-2">
+                        <div class="text-sm font-bold text-blue-800">${selectedClinic.name}</div>
+                        <div class="text-xs text-gray-600">${currentDate}</div>
+                    </div>
+                    
+                    <div class="flex-1 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-xs text-gray-600 mb-1">رقمك</div>
+                            <div class="text-6xl font-bold text-blue-900">${i}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center border-t-2 border-dashed pt-2 mt-2">
+                        <div class="text-xs text-gray-700">
+                            <div class="font-semibold mb-1">وقت الانتظار المتوقع</div>
+                            <div class="text-blue-600 font-bold">${waitTime}</div>
+                        </div>
+                        ${waitingBefore > 0 ? `<div class="text-xs text-gray-600 mt-1">عدد المنتظرين: ${waitingBefore + i}</div>` : ''}
+                    </div>
+                    
+                    <div class="text-center mt-2">
+                        <div class="text-xs text-gray-500">نتمنى لكم السلامة</div>
+                    </div>
+                `;
+                
+                container.appendChild(ticket);
+            }
+
+            const count = end - start + 1;
+            document.getElementById('ticketCount').textContent = count;
+            document.getElementById('previewSection').classList.remove('hidden');
+            
+            console.log(`✅ Generated ${count} tickets`);
         }
 
-        function testNumber(num) {
-            if (!audioHandler) {
-                alert('جاري التحميل... يرجى الانتظار');
+        // Print tickets
+        function printTickets() {
+            const container = document.getElementById('ticketsContainer');
+            if (container.children.length === 0) {
+                alert('يرجى إنشاء التذاكر أولاً');
                 return;
             }
 
-            const files = audioHandler.numberToAudioFiles(num);
-            
-            // Display sequence
-            const sequenceDiv = document.getElementById('fileSequence');
-            sequenceDiv.innerHTML = `
-                <strong>الرقم ${num}:</strong><br>
-                التسلسل: ${files.join(' → ')}<br>
-                <span class="text-green-600">عدد الملفات: ${files.length}</span>
-            `;
-
-            // Play audio (mock - since we don't have actual files)
-            console.log(`Playing: ${files.join(' → ')}`);
-            
-            // Use TTS as fallback
-            const arabicText = getArabicText(num);
-            speak(arabicText);
+            console.log('🖨️ Printing tickets...');
+            window.print();
         }
 
-        function testCustomNumber() {
-            const num = parseInt(document.getElementById('customNumber').value);
-            if (isNaN(num) || num < 0 || num > 999) {
-                alert('يرجى إدخال رقم بين 0 و 999');
-                return;
-            }
-            testNumber(num);
-        }
-
-        function getArabicText(num) {
-            const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
-            const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
-            const hundreds = ['', 'مائة', 'مئتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
-
-            if (num === 0) return 'صفر';
-            if (num < 10) return ones[num];
-            if (num === 10) return 'عشرة';
-            if (num < 20) {
-                const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
-                return teens[num - 10];
-            }
-
-            const h = Math.floor(num / 100);
-            const remainder = num % 100;
-            const t = Math.floor(remainder / 10);
-            const o = remainder % 10;
-
-            let result = [];
-
-            // Ones first (Arabic order)
-            if (o > 0 && t > 0) {
-                result.push(ones[o]);
-            }
-
-            // Tens
-            if (t > 0) {
-                result.push(tens[t]);
-            } else if (o > 0 && h > 0) {
-                result.push(ones[o]);
-            }
-
-            // Hundreds
-            if (h > 0) {
-                result.push(hundreds[h]);
-            }
-
-            return result.join(' و ');
-        }
-
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ar-SA';
-                utterance.rate = 0.9;
-                speechSynthesis.speak(utterance);
+        // Clear tickets
+        function clearTickets() {
+            if (confirm('هل تريد مسح جميع التذاكر؟')) {
+                document.getElementById('ticketsContainer').innerHTML = '';
+                document.getElementById('previewSection').classList.add('hidden');
+                console.log('✅ Tickets cleared');
             }
         }
 
-        window.addEventListener('load', init);
+        // Initialize
+        window.addEventListener('load', async () => {
+            console.log('🖨️ Print page loaded');
+            await loadClinics();
+        });
     </script>
 </body>
 </html>

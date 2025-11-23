@@ -1,473 +1,127 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - العيادة</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/custom-styles.css">
+  <meta charset="UTF-8">
+  <title>لوحة التحكم</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-indigo-100 to-blue-100 min-h-screen" dir="rtl">
-    <!-- Login Screen -->
-    <div id="loginScreen" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-6">
-                <div class="text-6xl mb-4">🏥</div>
-                <h1 class="text-3xl font-bold text-blue-800 mb-2">تسجيل الدخول</h1>
-                <p class="text-gray-600">لوحة تحكم العيادة</p>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block mb-2 font-semibold text-gray-700">اختر العيادة</label>
-                <select id="clinicSelect" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none">
-                    <option value="">-- اختر العيادة --</option>
-                </select>
-            </div>
-            
-            <div class="mb-6">
-                <label class="block mb-2 font-semibold text-gray-700">كلمة المرور</label>
-                <input type="password" id="passwordInput" class="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none" placeholder="أدخل كلمة المرور">
-            </div>
-            
-            <button onclick="login()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition text-lg">
-                🔑 دخول
-            </button>
-            
-            <div id="loginError" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center font-semibold"></div>
-            
-            <div class="mt-6 text-center">
-                <a href="index.html" class="text-blue-600 hover:text-blue-800 text-sm underline">← العودة للصفحة الرئيسية</a>
-            </div>
-        </div>
+<body class="bg-gradient-to-br from-purple-50 to-indigo-100 min-h-screen" dir="rtl">
+
+<nav class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex justify-between items-center">
+  <h1 class="text-2xl font-bold">لوحة التحكم</h1>
+  <select id="myClinicSelect" class="text-gray-800 px-3 py-2 rounded-lg font-bold"></select>
+</nav>
+
+<div class="container mx-auto p-6 grid md:grid-cols-2 gap-6">
+
+  <!-- يسار: التحكم -->
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-xl font-bold mb-4">التحكم</h2>
+    <div class="flex gap-3 mb-4">
+      <button id="btnNext" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">التالي</button>
+      <button id="btnPrev" class="flex-1 bg-gray-600 text-white py-3 rounded-lg font-bold hover:bg-gray-700">السابق</button>
+      <button id="btnRepeat" class="flex-1 bg-yellow-500 text-white py-3 rounded-lg font-bold hover:bg-yellow-600">إعادة</button>
     </div>
-
-    <!-- Control Panel -->
-    <div id="controlPanel" class="hidden p-4 md:p-6">
-        <!-- Header -->
-        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6">
-            <div class="flex justify-between items-center flex-wrap gap-4">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-blue-800" id="clinicTitle">لوحة التحكم</h1>
-                    <p class="text-gray-600" id="clinicInfo">العيادة: ---</p>
-                </div>
-                <div class="flex gap-2">
-                    <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition font-semibold">
-                        🏠 الرئيسية
-                    </a>
-                    <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold">
-                        🚪 خروج
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Current Ticket Display -->
-        <div class="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-2xl p-6 md:p-8 mb-6 text-white">
-            <h2 class="text-xl md:text-2xl font-bold mb-4 text-center">الرقم الحالي</h2>
-            <div class="text-7xl md:text-9xl font-bold text-center mb-4" id="currentTicketDisplay">0</div>
-            <div class="text-center text-lg md:text-xl" id="lastCallTime">آخر نداء: ---</div>
-        </div>
-
-        <!-- Main Control Buttons -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <!-- Next -->
-            <button onclick="nextTicket()" class="bg-gradient-to-br from-green-600 to-green-700 text-white p-6 rounded-xl hover:from-green-700 hover:to-green-800 transition shadow-lg transform hover:scale-105">
-                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                </svg>
-                <span class="text-xl md:text-2xl font-bold block">➕ العميل التالي</span>
-            </button>
-
-            <!-- Repeat -->
-            <button onclick="repeatCall()" class="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow-lg transform hover:scale-105">
-                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                <span class="text-xl md:text-2xl font-bold block">🔄 تكرار النداء</span>
-            </button>
-
-            <!-- Previous -->
-            <button onclick="previousTicket()" class="bg-gradient-to-br from-yellow-600 to-yellow-700 text-white p-6 rounded-xl hover:from-yellow-700 hover:to-yellow-800 transition shadow-lg transform hover:scale-105">
-                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
-                </svg>
-                <span class="text-xl md:text-2xl font-bold block">➖ العميل السابق</span>
-            </button>
-        </div>
-
-        <!-- Additional Controls -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <!-- Custom Call -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold mb-4 text-blue-800 flex items-center gap-2">
-                    <span>🎤</span>
-                    نداء رقم معين
-                </h3>
-                <div class="flex gap-2">
-                    <input type="number" id="customTicketInput" placeholder="رقم العميل" class="flex-1 p-3 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none text-xl text-center" min="0">
-                    <button onclick="callCustomTicket()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-bold">
-                        نداء
-                    </button>
-                </div>
-            </div>
-
-            <!-- Display Name -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold mb-4 text-green-800 flex items-center gap-2">
-                    <span>👤</span>
-                    عرض اسم
-                </h3>
-                <div class="flex gap-2">
-                    <input type="text" id="customNameInput" placeholder="اسم العميل" class="flex-1 p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none">
-                    <button onclick="displayCustomName()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-bold">
-                        عرض
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Management Buttons -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Reset -->
-            <button onclick="resetClinic()" class="bg-red-600 text-white p-4 rounded-xl hover:bg-red-700 transition shadow-lg font-bold">
-                <svg class="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-                🗑️ تصفير
-            </button>
-
-            <!-- Emergency -->
-            <button onclick="emergencyCall()" class="bg-purple-600 text-white p-4 rounded-xl hover:bg-purple-700 transition shadow-lg font-bold">
-                <svg class="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                🚨 طوارئ
-            </button>
-
-            <!-- Pause -->
-            <button onclick="pauseClinic()" id="pauseBtn" class="bg-orange-600 text-white p-4 rounded-xl hover:bg-orange-700 transition shadow-lg font-bold">
-                <svg class="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                ⏸️ إيقاف
-            </button>
-
-            <!-- Resume -->
-            <button onclick="resumeClinic()" id="resumeBtn" class="hidden bg-teal-600 text-white p-4 rounded-xl hover:bg-teal-700 transition shadow-lg font-bold">
-                <svg class="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                ▶️ استئناف
-            </button>
-        </div>
-
-        <!-- Status Message -->
-        <div id="statusMessage" class="hidden mt-6 p-4 rounded-lg text-center font-bold text-lg"></div>
+    <div class="flex gap-2">
+      <input id="customNum" type="number" placeholder="رقم مخصص" class="flex-1 p-3 border rounded-lg">
+      <button id="btnCustom" class="bg-green-600 text-white px-4 rounded-lg hover:bg-green-700">نداء</button>
     </div>
+    <hr class="my-4">
+    <div class="flex gap-2">
+      <input id="alertMsg" type="text" placeholder="رسالة تنبيه" class="flex-1 p-3 border rounded-lg">
+      <select id="targetClinic" class="p-3 border rounded-lg"></select>
+      <button id="btnAlert" class="bg-red-600 text-white px-4 rounded-lg hover:bg-red-700">إرسال</button>
+    </div>
+  </div>
 
-    <script src="js/firebase-config.js"></script>
-    <script src="js/audio-handler.js"></script>
-    <script src="js/queue-manager.js"></script>
-    <script>
-        let currentClinic = null;
-        let clinics = [];
+  <!-- يمين: التحويل -->
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-xl font-bold mb-4">تحويل مريض</h2>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <input id="transferNum" type="number" placeholder="رقم المريض" class="p-3 border rounded-lg">
+      <select id="toClinic" class="p-3 border rounded-lg"></select>
+    </div>
+    <button id="btnTransfer" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700">تحويل فوري</button>
+  </div>
 
-        // Wait for Firebase
-        function waitForFirebase() {
-            return new Promise((resolve) => {
-                if (window.storage) {
-                    resolve();
-                } else {
-                    setTimeout(() => waitForFirebase().then(resolve), 100);
-                }
-            });
-        }
+</div>
 
-        // Load clinics for login
-        async function loadClinicsForLogin() {
-            await waitForFirebase();
-            try {
-                const result = await window.storage.get('clinic-list');
-                if (result && result.value) {
-                    clinics = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
-                    const select = document.getElementById('clinicSelect');
-                    select.innerHTML = '<option value="">-- اختر العيادة --</option>';
-                    
-                    clinics.forEach(clinic => {
-                        const option = document.createElement('option');
-                        option.value = clinic.id;
-                        option.textContent = `${clinic.name} (${clinic.number})`;
-                        select.appendChild(option);
-                    });
-                    
-                    console.log('✅ Clinics loaded:', clinics.length);
-                } else {
-                    console.log('⚠️ No clinics found');
-                }
-            } catch (error) {
-                console.error('❌ Error loading clinics:', error);
-            }
-        }
+<!-- رسالة واردة -->
+<div id="incomingAlert" class="hidden fixed top-4 right-4 bg-red-600 text-white p-4 rounded-lg shadow-xl max-w-sm">
+  <div class="font-bold mb-1">📢 تنبيه وارد</div>
+  <div id="alertContent"></div>
+  <button onclick="document.getElementById('incomingAlert').classList.add('hidden')" class="mt-2 text-xs underline">إغلاق</button>
+</div>
 
-        // Login
-        function login() {
-            const clinicId = document.getElementById('clinicSelect').value;
-            const password = document.getElementById('passwordInput').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            if (!clinicId) {
-                errorDiv.textContent = 'يرجى اختيار العيادة';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            
-            if (!password) {
-                errorDiv.textContent = 'يرجى إدخال كلمة المرور';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
+<script src="js/firebase-config.js"></script>
+<script>
+  let myClinic = null;
+  let clinics = [];
 
-            const clinic = clinics.find(c => c.id === parseInt(clinicId));
-            
-            if (clinic && clinic.password === password) {
-                currentClinic = clinic;
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('controlPanel').classList.remove('hidden');
-                
-                document.getElementById('clinicTitle').textContent = clinic.name;
-                document.getElementById('clinicInfo').textContent = `العيادة: ${clinic.name} | الرقم: ${clinic.number}`;
-                updateDisplay();
-                
-                showStatus('✅ تم تسجيل الدخول بنجاح', 'success');
-                console.log('✅ Logged in:', clinic.name);
-            } else {
-                errorDiv.textContent = '❌ كلمة المرور غير صحيحة';
-                errorDiv.classList.remove('hidden');
-            }
-        }
+  async function loadClinics(){
+    const res = await window.storage.get('clinic-list');
+    clinics = res?.value ? (typeof res.value==='string'?JSON.parse(res.value):res.value) : [];
+    populateSelects();
+  }
+  function populateSelects(){
+    const html = clinics.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    ['myClinicSelect','targetClinic','toClinic'].forEach(id=>document.getElementById(id).innerHTML=html);
+    myClinic = clinics[0];
+    document.getElementById('myClinicSelect').value = myClinic.id;
+  }
+  document.getElementById('myClinicSelect').onchange = e=>{
+    myClinic = clinics.find(c=>c.id==e.target.value);
+  };
 
-        // Logout
-        function logout() {
-            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-                currentClinic = null;
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.getElementById('controlPanel').classList.add('hidden');
-                document.getElementById('passwordInput').value = '';
-                document.getElementById('clinicSelect').value = '';
-                location.reload();
-            }
-        }
+  // نداء
+  async function call(num){
+    const callData = {clinicId:myClinic.id, clinicName:myClinic.name, ticketNumber:num, timestamp:Date.now()};
+    await window.storage.set('current-call', JSON.stringify(callData), true);
+    myClinic.currentTicket = num;
+    await window.storage.set('clinic-list', JSON.stringify(clinics));
+  }
+  document.getElementById('btnNext').onclick = ()=> call((myClinic.currentTicket||0)+1);
+  document.getElementById('btnPrev').onclick = ()=> call(Math.max(0,(myClinic.currentTicket||0)-1));
+  document.getElementById('btnRepeat').onclick = ()=> call(myClinic.currentTicket||0);
+  document.getElementById('btnCustom').onclick = ()=>{
+    const n = parseInt(document.getElementById('customNum').value);
+    if(n) call(n);
+  };
 
-        // Update display
-        function updateDisplay() {
-            if (currentClinic) {
-                document.getElementById('currentTicketDisplay').textContent = currentClinic.currentTicket || 0;
-                
-                if (currentClinic.lastCall) {
-                    const time = new Date(currentClinic.lastCall).toLocaleTimeString('ar-EG');
-                    document.getElementById('lastCallTime').textContent = `آخر نداء: ${time}`;
-                } else {
-                    document.getElementById('lastCallTime').textContent = 'لم يتم النداء بعد';
-                }
-            }
-        }
+  // تنبيه بين العيادات
+  document.getElementById('btnAlert').onclick = async ()=>{
+    const msg = document.getElementById('alertMsg').value.trim();
+    const targetId = document.getElementById('targetClinic').value;
+    if(!msg) return;
+    await window.storage.set(`alert-${targetId}`, {from:myClinic.name, msg, ts:Date.now()}, true);
+    document.getElementById('alertMsg').value='';
+  };
+  // استقبال تنبيه
+  setInterval(async()=>{
+    const key = `alert-${myClinic.id}`;
+    const res = await window.storage.get(key, true);
+    if(res?.value){
+      const d = typeof res.value==='string'?JSON.parse(res.value):res.value;
+      document.getElementById('alertContent').innerHTML = `<div class="font-semibold">${d.from}</div><div>${d.msg}</div>`;
+      document.getElementById('incomingAlert').classList.remove('hidden');
+      await window.storage.delete(key, true);
+    }
+  },1000);
 
-        // Call ticket
-        async function callTicket(ticketNumber) {
-            if (!currentClinic) return;
-            
-            const callData = {
-                clinicId: currentClinic.id,
-                ticketNumber: ticketNumber,
-                clinicName: currentClinic.name,
-                clinicNumber: currentClinic.number,
-                timestamp: Date.now()
-            };
-            
-            try {
-                await window.storage.set('current-call', callData, true);
-                
-                currentClinic.currentTicket = ticketNumber;
-                currentClinic.lastCall = new Date().toISOString();
-                
-                // Update in storage
-                const index = clinics.findIndex(c => c.id === currentClinic.id);
-                if (index !== -1) {
-                    clinics[index] = currentClinic;
-                    await window.storage.set('clinic-list', clinics);
-                }
-                
-                updateDisplay();
-                showStatus(`✅ تم نداء العميل رقم ${ticketNumber}`, 'success');
-                console.log('✅ Called ticket:', ticketNumber);
-            } catch (error) {
-                showStatus('❌ حدث خطأ في النداء', 'error');
-                console.error('❌ Error calling ticket:', error);
-            }
-        }
+  // تحويل مريض
+  document.getElementById('btnTransfer').onclick = async ()=>{
+    const num = parseInt(document.getElementById('transferNum').value);
+    const toId = document.getElementById('toClinic').value;
+    if(!num) return alert('أدخل رقم المريض');
+    const toClinic = clinics.find(c=>c.id==toId);
+    const callData = {clinicId:toId, clinicName:toClinic.name, ticketNumber:num, timestamp:Date.now(), transfer:true, from:myClinic.name};
+    await window.storage.set('current-call', JSON.stringify(callData), true);
+    toClinic.currentTicket = num;
+    await window.storage.set('clinic-list', JSON.stringify(clinics));
+    document.getElementById('transferNum').value='';
+  };
 
-        // Next ticket
-        function nextTicket() {
-            const next = (currentClinic.currentTicket || 0) + 1;
-            callTicket(next);
-        }
-
-        // Previous ticket
-        function previousTicket() {
-            const prev = Math.max(1, (currentClinic.currentTicket || 0) - 1);
-            if (currentClinic.currentTicket === 0) {
-                showStatus('⚠️ لا يوجد رقم سابق', 'warning');
-                return;
-            }
-            callTicket(prev);
-        }
-
-        // Repeat call
-        function repeatCall() {
-            if (currentClinic.currentTicket && currentClinic.currentTicket > 0) {
-                callTicket(currentClinic.currentTicket);
-            } else {
-                showStatus('⚠️ لا يوجد رقم للتكرار', 'warning');
-            }
-        }
-
-        // Reset clinic
-        function resetClinic() {
-            if (confirm('⚠️ هل أنت متأكد من تصفير العيادة؟\nسيتم إعادة الرقم إلى 0')) {
-                callTicket(0);
-                showStatus('✅ تم تصفير العيادة', 'success');
-            }
-        }
-
-        // Call custom ticket
-        function callCustomTicket() {
-            const ticketNumber = parseInt(document.getElementById('customTicketInput').value);
-            if (ticketNumber && ticketNumber >= 0) {
-                callTicket(ticketNumber);
-                document.getElementById('customTicketInput').value = '';
-            } else {
-                showStatus('⚠️ يرجى إدخال رقم صحيح', 'warning');
-            }
-        }
-
-        // Display custom name
-        async function displayCustomName() {
-            const name = document.getElementById('customNameInput').value.trim();
-            if (name) {
-                try {
-                    await window.storage.set('display-name', name, true);
-                    document.getElementById('customNameInput').value = '';
-                    showStatus(`✅ تم عرض: ${name}`, 'success');
-                } catch (error) {
-                    showStatus('❌ حدث خطأ في عرض الاسم', 'error');
-                }
-            } else {
-                showStatus('⚠️ يرجى إدخال اسم', 'warning');
-            }
-        }
-
-        // Emergency call
-        async function emergencyCall() {
-            if (confirm('🚨 هل تريد إرسال نداء طوارئ؟\nسيتم تشغيل صوت الطوارئ وإشعار أحمر على جميع الشاشات')) {
-                try {
-                    // Send emergency signal
-                    const emergencyData = {
-                        type: 'emergency',
-                        clinicId: currentClinic.id,
-                        clinicName: currentClinic.name,
-                        timestamp: Date.now()
-                    };
-                    
-                    // Set instant audio to emergency
-                    await window.storage.set('instant-audio', 'emergency.mp3', true);
-                    
-                    // Set emergency display
-                    await window.storage.set('emergency-alert', emergencyData, true);
-                    
-                    showStatus('🚨 تم إرسال نداء الطوارئ', 'error');
-                    
-                    // Clear after 10 seconds
-                    setTimeout(async () => {
-                        await window.storage.delete('emergency-alert', true);
-                    }, 10000);
-                    
-                } catch (error) {
-                    showStatus('❌ حدث خطأ في إرسال نداء الطوارئ', 'error');
-                    console.error('Emergency call error:', error);
-                }
-            }
-        }
-
-        // Pause clinic
-        async function pauseClinic() {
-            currentClinic.isActive = false;
-            document.getElementById('pauseBtn').classList.add('hidden');
-            document.getElementById('resumeBtn').classList.remove('hidden');
-            
-            const index = clinics.findIndex(c => c.id === currentClinic.id);
-            if (index !== -1) {
-                clinics[index] = currentClinic;
-                await window.storage.set('clinic-list', clinics);
-            }
-            
-            showStatus('⏸️ تم إيقاف العيادة مؤقتاً', 'warning');
-        }
-
-        // Resume clinic
-        async function resumeClinic() {
-            currentClinic.isActive = true;
-            document.getElementById('pauseBtn').classList.remove('hidden');
-            document.getElementById('resumeBtn').classList.add('hidden');
-            
-            const index = clinics.findIndex(c => c.id === currentClinic.id);
-            if (index !== -1) {
-                clinics[index] = currentClinic;
-                await window.storage.set('clinic-list', clinics);
-            }
-            
-            showStatus('▶️ تم استئناف العيادة', 'success');
-        }
-
-        // Show status message
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('statusMessage');
-            statusDiv.textContent = message;
-            statusDiv.className = 'mt-6 p-4 rounded-lg text-center font-bold text-lg';
-            
-            if (type === 'success') {
-                statusDiv.classList.add('bg-green-100', 'text-green-800');
-            } else if (type === 'error') {
-                statusDiv.classList.add('bg-red-100', 'text-red-800');
-            } else if (type === 'warning') {
-                statusDiv.classList.add('bg-yellow-100', 'text-yellow-800');
-            }
-            
-            statusDiv.classList.remove('hidden');
-            
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-            }, 3000);
-        }
-
-        // Enter key support
-        document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
-        });
-
-        document.getElementById('customTicketInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') callCustomTicket();
-        });
-
-        document.getElementById('customNameInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') displayCustomName();
-        });
-
-        // Initialize
-        window.addEventListener('load', () => {
-            loadClinicsForLogin();
-            console.log('✅ Control page loaded');
-        });
-    </script>
+  loadClinics();
+</script>
 </body>
 </html>

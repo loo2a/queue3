@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معاينة تصميم كروت العيادات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card-preview {
+            min-height: 70px;
+            max-height: 120px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-indigo-900 min-h-screen p-8" dir="rtl">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white text-gray-800 rounded-2xl shadow-2xl p-8 mb-6">
+            <h1 class="text-4xl font-bold mb-6 text-center text-blue-800">🏥 معاينة تصميم كروت العيادات</h1>
+            
+            <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-blue-800">✨ التصميم الجديد - مميزات:</h2>
+                <ul class="space-y-2 text-lg">
+                    <li>✅ <strong>سطرين فقط</strong> - ارتفاع أقل، محتوى أكثر</li>
+                    <li>✅ <strong>بدون سكرول</strong> - يتسع لـ 8 عيادات بوضوح</li>
+                    <li>✅ <strong>اسم العيادة + الرقم</strong> في سطر واحد</li>
+                    <li>✅ <strong>الحالة + التوقيت</strong> في السطر الثاني</li>
+                    <li>✅ <strong>العيادات المتوقفة</strong> تظهر باهتة بلون رمادي</li>
+                    <li>✅ <strong>تمييز واضح</strong> بين النشطة والمتوقفة</li>
+                </ul>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Active Clinic Preview -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-green-800">🟢 عيادة نشطة</h3>
+                    <div class="bg-gradient-to-br from-blue-900 to-indigo-900 p-6 rounded-lg">
+                        <div class="space-y-2">
+                            <!-- Card 1 -->
+                            <div class="card-preview bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-3 shadow-lg hover:scale-105 transition">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white truncate flex-1">طب الأسرة</h3>
+                                    <div class="text-4xl font-bold bg-white text-blue-900 rounded px-3 py-1 ml-2 min-w-[60px] text-center">
+                                        125
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-white">
+                                    <span class="bg-green-500 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                        🟢 نشط
+                                    </span>
+                                    <span class="text-blue-100">
+                                        🕐 14:25
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="card-preview bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-3 shadow-lg hover:scale-105 transition">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white truncate flex-1">الأسنان</h3>
+                                    <div class="text-4xl font-bold bg-white text-blue-900 rounded px-3 py-1 ml-2 min-w-[60px] text-center">
+                                        87
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-white">
+                                    <span class="bg-green-500 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                        🟢 نشط
+                                    </span>
+                                    <span class="text-blue-100">
+                                        🕐 14:30
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div class="card-preview bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-3 shadow-lg hover:scale-105 transition">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white truncate flex-1">الجلدية</h3>
+                                    <div class="text-4xl font-bold bg-white text-blue-900 rounded px-3 py-1 ml-2 min-w-[60px] text-center">
+                                        56
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-white">
+                                    <span class="bg-green-500 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                        🟢 نشط
+                                    </span>
+                                    <span class="text-blue-100">
+                                        🕐 14:28
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inactive Clinic Preview -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-red-800">⏸️ عيادة متوقفة</h3>
+                    <div class="bg-gradient-to-br from-blue-900 to-indigo-900 p-6 rounded-lg">
+                        <div class="space-y-2">
+                            <!-- Inactive Card -->
+                            <div class="card-preview bg-gray-400 opacity-60 rounded-lg p-3 shadow-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white truncate flex-1">العيون</h3>
+                                    <div class="text-4xl font-bold bg-white text-gray-700 rounded px-3 py-1 ml-2 min-w-[60px] text-center">
+                                        32
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-white">
+                                    <span class="bg-red-500 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                        ⏸️ متوقف
+                                    </span>
+                                    <span class="text-gray-200">
+                                        🕐 13:45
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="card-preview bg-gray-400 opacity-60 rounded-lg p-3 shadow-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-bold text-white truncate flex-1">القلب</h3>
+                                    <div class="text-4xl font-bold bg-white text-gray-700 rounded px-3 py-1 ml-2 min-w-[60px] text-center">
+                                        ---
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-white">
+                                    <span class="bg-red-500 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                        ⏸️ متوقف
+                                    </span>
+                                    <span class="text-gray-200">
+                                        لم يتم النداء
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- During Call Animation -->
+            <div class="mt-8 bg-yellow-50 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-yellow-800">🔔 أثناء النداء (تأثير الوميض)</h3>
+                <div class="bg-gradient-to-br from-blue-900 to-indigo-900 p-6 rounded-lg">
+                    <div class="card-preview bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-3 shadow-2xl animate-pulse">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-bold text-gray-900 truncate flex-1">طب الأسرة</h3>
+                            <div class="text-4xl font-bold bg-white text-blue-900 rounded px-3 py-1 ml-2 min-w-[60px] text-center">
+                                126
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-900">
+                            <span class="bg-green-500 text-white px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                🟢 نشط
+                            </span>
+                            <span class="font-bold">
+                                🕐 الآن
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison -->
+            <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-2xl font-bold mb-4 text-gray-800">📊 المقارنة</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-bold text-red-600 mb-2">❌ التصميم القديم:</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>• كروت كبيرة جداً</li>
+                            <li>• يحتاج سكرول</li>
+                            <li>• 3-4 عيادات فقط ظاهرة</li>
+                            <li>• مساحة مهدرة</li>
+                            <li>• العيادات المتوقفة مخفية</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-green-600 mb-2">✅ التصميم الجديد:</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>• كروت مدمجة (سطرين)</li>
+                            <li>• بدون سكرول</li>
+                            <li>• 8+ عيادات واضحة</li>
+                            <li>• استغلال أمثل للمساحة</li>
+                            <li>• العيادات المتوقفة ظاهرة باهتة</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specs -->
+            <div class="mt-8 bg-blue-50 p-6 rounded-lg">
+                <h3 class="text-2xl font-bold mb-4 text-blue-800">📐 المواصفات التقنية</h3>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <strong>ارتفاع الكارت:</strong> 70-120px
+                    </div>
+                    <div>
+                        <strong>الخط:</strong> text-lg للعنوان، text-4xl للرقم
+                    </div>
+                    <div>
+                        <strong>الفجوة:</strong> 0.5rem بين الكروت
+                    </div>
+                    <div>
+                        <strong>السطر الأول:</strong> اسم + رقم (flex justify-between)
+                    </div>
+                    <div>
+                        <strong>السطر الثاني:</strong> حالة + وقت (text-xs)
+                    </div>
+                    <div>
+                        <strong>العيادات المتوقفة:</strong> opacity-60 + bg-gray-400
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="index.html" class="text-blue-200 hover:text-white underline text-lg">← العودة للصفحة الرئيسية</a>
+        </div>
+    </div>
+</body>
+</html>

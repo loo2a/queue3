@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>شاشة عرض - الدور <span id="floorNum">1</span></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+    .marquee{animation:marquee 20s linear infinite}
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white h-screen flex flex-col">
+
+  <!-- الهيدر -->
+  <header class="bg-blue-800 px-6 py-3 flex justify-between items-center">
+    <h1 class="text-2xl font-bold" id="centerName">مركز الرعاية الطبية</h1>
+    <div>
+      <div class="text-xl font-bold" id="currentTime"></div>
+      <div class="text-sm" id="currentDate"></div>
+    </div>
+  </header>
+
+  <!-- اختيار الدور (مخفي في العرض لكن مفيد للـ JS) -->
+  <input type="hidden" id="floorNumber" value="1">
+
+  <!-- منطقة الفيديو -->
+  <div class="flex-1 p-4">
+    <video id="mediaPlayer" class="w-full h-full object-contain rounded-xl" autoplay muted loop></video>
+  </div>
+
+  <!-- شريط الأخبار -->
+  <footer class="bg-red-600 py-2 overflow-hidden">
+    <div class="marquee whitespace-nowrap text-lg font-bold" id="newsText">مرحباً بكم - نتمنى لكم الشفاء العاجل</div>
+  </footer>
+
+  <script src="js/firebase-config.js"></script>
+  <script>
+    const floor = parseInt(document.getElementById('floorNumber').value);
+    const mediaSources = [
+      'media/health1.mp4',
+      'media/health2.mp4',
+      'media/health3.mp4'
+    ];
+    let idx = 0;
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('ar-EG');
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('ar-EG', {weekday:'long'});
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    const vid = document.getElementById('mediaPlayer');
+    function loadVideo() {
+      vid.src = mediaSources[idx];
+      vid.onended = () => { idx = (idx+1)%mediaSources.length; loadVideo(); };
+    }
+    loadVideo();
+
+    // تحميل إعدادات المركز
+    async function loadSettings() {
+      await new Promise(r=>setTimeout(r,500)); // انتظر Firebase
+      const res = await window.storage.get('clinic-settings');
+      if(res?.value){
+        const s = typeof res.value==='string'?JSON.parse(res.value):res.value;
+        document.getElementById('centerName').textContent = s.centerName;
+        document.getElementById('newsText').textContent = s.newsText;
+      }
+    }
+    loadSettings();
+  </script>
+</body>
+</html>

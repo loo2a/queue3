@@ -4,70 +4,203 @@
   <meta charset="UTF-8">
   <title>شاشة عرض المرضى</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom-styles.css">
   <style>
     @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-    .marquee{animation:marquee 20s linear infinite}
+    .marquee{animation:marquee 25s linear infinite}
+    @keyframes pulse-scale{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .active-call{animation:pulse-scale .5s ease-in-out 3,shake .5s ease-in-out 2;box-shadow:0 0 30px rgba(234,179,8,.8)!important;background:linear-gradient(135deg,#fbbf24,#f59e0b)!important}
+    #clinicCards{display:grid;grid-template-columns:1fr;gap:.5rem;height:calc(100% - 180px);overflow:hidden}
+    #clinicCards>div{min-height:70px;max-height:120px}
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white h-screen flex flex-col">
+<body class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white overflow-hidden">
 
-  <!-- الهيدر -->
-  <header class="bg-blue-800 px-6 py-3 flex justify-between items-center">
-    <h1 class="text-2xl font-bold" id="centerName">مركز الرعاية الطبية</h1>
-    <div>
-      <div class="text-xl font-bold" id="currentTime"></div>
-      <div class="text-sm" id="currentDate"></div>
+<!-- Header -->
+<div class="bg-blue-800 px-8 py-3 shadow-lg flex justify-between items-center">
+  <h1 class="text-3xl font-bold" id="centerName">مركز الرعاية الطبية</h1>
+  <div class="text-right">
+    <div class="text-2xl font-bold" id="currentTime">00:00:00</div>
+    <div class="text-lg" id="currentDate">الأحد، 1 يناير 2025</div>
+  </div>
+</div>
+
+<!-- Dropdown اختيار الدور -->
+<div class="bg-blue-700 px-8 py-2 flex justify-between items-center">
+  <div></div>
+  <div class="flex items-center gap-3">
+    <label class="font-bold">الدور:</label>
+    <select id="floorSelect" class="text-gray-800 px-3 py-1 rounded-lg font-bold"></select>
+  </div>
+</div>
+
+<!-- Notification Banner -->
+<div id="notificationBanner" class="hidden bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-6 text-center shadow-2xl">
+  <div class="text-4xl font-bold mb-2" id="notificationText"></div>
+  <div class="text-xl" id="notificationTime"></div>
+</div>
+
+<!-- Main Content -->
+<div class="flex h-[calc(100vh-160px)]">
+  <!-- Clinics Panel (Right Side) -->
+  <div class="w-1/4 p-3 flex flex-col">
+    <h2 class="text-xl font-bold mb-2 text-center bg-gradient-to-r from-blue-600 to-blue-700 py-2 rounded-lg shadow-lg">العيادات</h2>
+    <div id="clinicCards" class="flex-1 grid auto-rows-min gap-2 content-start"></div>
+    <!-- QR Code Section -->
+    <div class="bg-white text-black rounded-lg p-3 text-center shadow-lg mt-2">
+      <h3 class="font-bold mb-2 text-sm text-blue-800">📱 قيّم خدمتنا</h3>
     </div>
-  </header>
-
-  <!-- منطقة الفيديو -->
-  <div class="flex-1 p-4">
-    <video id="mediaPlayer" class="w-full h-full object-contain rounded-xl" autoplay muted loop></video>
   </div>
 
-  <!-- شريط الأخبار -->
-  <footer class="bg-red-600 py-2 overflow-hidden">
-    <div class="marquee whitespace-nowrap text-lg font-bold" id="newsText">مرحباً بكم - نتمنى لكم الشفاء العاجل</div>
-  </footer>
+  <!-- Media Panel (Left Side) -->
+  <div class="w-3/4 p-4">
+    <div class="bg-black rounded-xl overflow-hidden h-full relative shadow-2xl">
+      <video id="mediaPlayer" class="w-full h-full object-contain" autoplay muted loop>المتصفح لا يدعم تشغيل الفيديو</video>
+      <div id="mediaLoading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-90">
+        <div class="text-center">
+          <div class="spinner mx-auto mb-4"></div>
+          <p class="text-xl">جاري التحميل...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <script src="js/firebase-config.js"></script>
-  <script>
-    // قراءة رقم الدور من الـ URL
-    const urlParams = new URLSearchParams(window.search);
-    const floor = parseInt(urlParams.get('floor')) || 0; // 0 = كل العيادات
+<!-- News Ticker -->
+<div class="bg-gradient-to-r from-red-600 to-red-700 py-3 overflow-hidden shadow-lg">
+  <div class="marquee whitespace-nowrap text-2xl font-bold"><span id="newsText">مرحباً بكم في مركزنا الطبي - نتمنى لكم الشفاء العاجل ⭐ أوقات العمل من 8 صباحاً حتى 6 مساءً</span></div>
+</div>
 
-    const mediaSources = [
-      'media/health1.mp4',
-      'media/health2.mp4',
-      'media/health3.mp4'
-    ];
-    let idx = 0;
+<audio id="audioPlayer" style="display:none;"></audio>
 
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('currentTime').textContent = now.toLocaleTimeString('ar-EG');
-      document.getElementById('currentDate').textContent = now.toLocaleDateString('ar-EG', {weekday:'long'});
+<script src="js/firebase-config.js"></script>
+<script src="js/audio-handler.js"></script>
+<script>
+  // بيانات الطوابق والعيادات (مثال)
+  const floorsData = {
+    1: [
+      {id:1, name:'طب الأسرة', number:1, currentTicket:0, isActive:true, lastCall:null},
+      {id:2, name:'الأسنان', number:2, currentTicket:0, isActive:true, lastCall:null},
+      {id:3, name:'الجلدية', number:3, currentTicket:0, isActive:true, lastCall:null}
+    ],
+    2: [
+      {id:4, name:'المعمل', number:4, currentTicket:0, isActive:true, lastCall:null},
+      {id:5, name:'الأشعة', number:5, currentTicket:0, isActive:true, lastCall:null},
+      {id:6, name:'التحاليل', number:6, currentTicket:0, isActive:true, lastCall:null}
+    ],
+    3: [
+      {id:7, name:'القلب', number:7, currentTicket:0, isActive:true, lastCall:null},
+      {id:8, name:'العظام', number:8, currentTicket:0, isActive:true, lastCall:null}
+    ]
+  };
+
+  let currentFloor = 1;
+  let clinicsData = [];
+  let audioHandler = new AudioHandler();
+
+  // ملء dropdown الطوابق
+  function populateFloorSelect() {
+    const select = document.getElementById('floorSelect');
+    select.innerHTML = Object.keys(floorsData).map(f=>`<option value="${f}">الدور ${f}</option>`).join('');
+    select.value = currentFloor;
+    select.onchange = e=>{
+      currentFloor = parseInt(e.target.value);
+      clinicsData = floorsData[currentFloor];
+      renderClinics();
+    };
+  }
+
+  // تحديث الساعة
+  function updateDateTime() {
+    const now = new Date();
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString('ar-EG', {hour12:false});
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  }
+  setInterval(updateDateTime, 1000); updateDateTime();
+
+  // عرض الكروت
+  function renderClinics() {
+    const container = document.getElementById('clinicCards');
+    container.innerHTML = '';
+    if(!clinicsData.length) return container.innerHTML = '<p class="text-center text-gray-300 py-8">لا توجد عيادات في هذا الدور</p>';
+    clinicsData.forEach(clinic=>{
+      const card = document.createElement('div');
+      card.id = `clinic-${clinic.id}`;
+      card.className = 'bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-3 shadow-lg transform transition-all duration-300 hover:scale-105';
+      card.innerHTML = `
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="text-lg font-bold truncate flex-1">${clinic.name}</h3>
+          <div class="text-4xl font-bold bg-white text-blue-900 rounded px-3 py-1 ml-2 min-w-[60px] text-center">${clinic.currentTicket||'---'}</div>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="bg-green-500 px-2 py-1 rounded-full font-semibold flex items-center gap-1">🟢 نشط</span>
+          <span class="text-blue-100">${clinic.lastCall ? '🕐 '+new Date(clinic.lastCall).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}) : 'لم يتم النداء'}</span>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // تحميل إعدادات المركز
+  async function loadSettings() {
+    await new Promise(r=>setTimeout(r,500));
+    const res = await window.storage.get('clinic-settings');
+    if(res?.value){
+      const s = typeof res.value==='string'?JSON.parse(res.value):res.value;
+      document.getElementById('centerName').textContent = s.centerName;
+      document.getElementById('newsText').textContent = s.newsText;
+      audioHandler.setSpeechRate(s.speechRate);
+      audioHandler.setAudioPath(s.audioPath);
     }
-    setInterval(updateClock, 1000); updateClock();
+  }
 
-    const vid = document.getElementById('mediaPlayer');
-    function loadVideo() {
-      vid.src = mediaSources[idx];
-      vid.onended = () => { idx = (idx+1)%mediaSources.length; loadVideo(); };
-    }
-    loadVideo();
-
-    // تحميل إعدادات المركز
-    async function loadSettings() {
-      await new Promise(r=>setTimeout(r,500));
-      const res = await window.storage.get('clinic-settings');
+  // الاستماع للنداءات
+  async function listenForCalls() {
+    await new Promise(r=>setTimeout(r,500));
+    try {
+      const res = await window.storage.get('current-call', true);
       if(res?.value){
-        const s = typeof res.value==='string'?JSON.parse(res.value):res.value;
-        document.getElementById('centerName').textContent = s.centerName;
-        document.getElementById('newsText').textContent = s.newsText;
+        const call = typeof res.value==='string'?JSON.parse(res.value):res.value;
+        // نبحث العيادة في كل الطوابق
+        let found = null;
+        for(const f of Object.keys(floorsData)){
+          const c = floorsData[f].find(cl=>cl.id===call.clinicId);
+          if(c){ found=c; break; }
+        }
+        if(found){
+          found.currentTicket = call.ticketNumber;
+          found.lastCall = new Date().toISOString();
+          if(parseInt(found.number) === parseInt(call.clinicNumber)) call.clinicNumber = found.number;
+          renderClinics();
+          // تشغيل الصوت
+          await audioHandler.callTicket(call.ticketNumber, call.clinicNumber||found.number, found.name);
+        }
       }
-    }
-    loadSettings();
-  </script>
+    } catch(e){}
+    setTimeout(listenForCalls, 1000);
+  }
+
+  // تشغيل الفيديو
+  const vid = document.getElementById('mediaPlayer');
+  const mediaSources = ['media/health1.mp4','media/health2.mp4','media/health3.mp4'];
+  let idx = 0;
+  function playNextMedia() {
+    vid.src = mediaSources[idx];
+    vid.onended = ()=>{ idx=(idx+1)%mediaSources.length; playNextMedia(); };
+    vid.onloadeddata = ()=> document.getElementById('mediaLoading').style.display='none';
+    vid.onerror = ()=>{ idx=(idx+1)%mediaSources.length; setTimeout(playNextMedia,2000); };
+  }
+
+  // Initialize
+  window.addEventListener('load', async()=>{
+    populateFloorSelect();
+    clinicsData = floorsData[currentFloor];
+    renderClinics();
+    await loadSettings();
+    listenForCalls();
+    playNextMedia();
+  });
+
+</script>
 </body>
 </html>

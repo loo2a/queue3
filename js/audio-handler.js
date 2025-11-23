@@ -131,7 +131,7 @@ class AudioHandler {
 
     const name = filename.replace('.mp3', '');
 
-    if (name === 'ding') return '';
+    if (name === 'ding') return 'تنبيه';
     if (name === 'prefix') return 'على العميل رقم';
     if (name === 'and') return 'و';
     if (name.startsWith('clinic')) return 'عيادة رقم ' + name.replace('clinic', '');
